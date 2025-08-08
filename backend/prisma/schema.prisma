@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Hospede {
-  id          Int      @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   nome        String
-  cpf         String
-  email       String?
+  cpf         String       @unique
+  email       String?      @unique
   telefone    String?
   profissao   String?
   rua         String
@@ -19,5 +19,21 @@ model Hospede {
   cidade      String
   estado      String
   complemento String?
-  criadoEm    DateTime @default(now())
+  criadoEm    DateTime     @default(now())
+  Hospedagem  Hospedagem[]
+}
+
+model Hospedagem {
+  id              Int      @id @default(autoincrement())
+  hospedeId       Int
+  hospede         Hospede  @relation(fields: [hospedeId], references: [id], onDelete: Cascade)
+  numeroQuarto    Int
+  dataHoraEntrada DateTime
+  dataHoraSaida   DateTime
+  valorDiaria     Float
+  formaPagamento  String
+  descontos       Float    @default(0)
+  acrescimos      Float    @default(0)
+  observacoes     String?
+  criadoEm        DateTime @default(now())
 }
