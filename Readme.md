@@ -1,0 +1,1 @@
+Inicialização do projeto de controle de hospedagens
