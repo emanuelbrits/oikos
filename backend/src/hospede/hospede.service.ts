@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class HospedeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async criar(data: Prisma.HospedeCreateInput) {
     return this.prisma.hospede.create({ data });
@@ -16,6 +16,20 @@ export class HospedeService {
 
   async buscarPorId(id: number) {
     return this.prisma.hospede.findUnique({ where: { id } });
+  }
+
+  async buscarPorNome(nome: string) {
+    if (!nome) {
+      return this.prisma.hospede.findMany();
+    }
+
+    return this.prisma.hospede.findMany({
+      where: {
+        nome: {
+          contains: nome.toLowerCase(),
+        },
+      },
+    });
   }
 
   async atualizar(id: number, data: Prisma.HospedeUpdateInput) {
