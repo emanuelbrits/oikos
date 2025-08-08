@@ -5,9 +5,10 @@ import { HospedeModule } from './hospede/hospede.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { HospedagemModule } from './hospedagem/hospedagem.module';
+import { ProdutoModule } from './produto/produto.module';
 
 @Module({
-  imports: [HospedeModule, PrismaModule, HospedagemModule],
+  imports: [HospedeModule, PrismaModule, HospedagemModule, ProdutoModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

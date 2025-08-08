@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "./ERD.svg"
+}
+
 model Hospede {
   id          Int          @id @default(autoincrement())
   nome        String
@@ -36,4 +41,12 @@ model Hospedagem {
   acrescimos      Float    @default(0)
   observacoes     String?
   criadoEm        DateTime @default(now())
+}
+
+model Produto {
+  id         Int     @id @default(autoincrement())
+  nome       String
+  descricao  String?
+  preco      Float
+  quantidade Int     @default(0)
 }
