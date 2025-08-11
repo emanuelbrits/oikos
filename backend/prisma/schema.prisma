@@ -24,7 +24,7 @@ model Hospede {
   cidade      String
   estado      String
   complemento String?
-  criadoEm    DateTime     @default(now())
+  criadoEm    DateTime     @default(dbgenerated("(datetime('now','-3 hours'))"))
   Hospedagem  Hospedagem[]
 }
 
@@ -40,7 +40,7 @@ model Hospedagem {
   descontos       Float    @default(0)
   acrescimos      Float    @default(0)
   observacoes     String?
-  criadoEm        DateTime @default(now())
+  criadoEm        DateTime @default(dbgenerated("(datetime('now','-3 hours'))"))
 }
 
 model Produto {

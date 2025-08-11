@@ -4,7 +4,7 @@ import { CreateHospedagemDto } from './dto/create-hospedagem.dto';
 import { UpdateHospedagemDto } from './dto/update-hospedagem.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
-@ApiTags('Hospedagens')
+@ApiTags('Hospedagem')
 @Controller('hospedagem')
 export class HospedagemController {
   constructor(private readonly service: HospedagemService) { }
