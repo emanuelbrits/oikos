@@ -90,3 +90,11 @@ model Reserva {
   observacoes     String?
   criadoEm        DateTime @default(dbgenerated("(datetime('now','-3 hours'))"))
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
