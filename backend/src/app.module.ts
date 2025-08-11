@@ -7,9 +7,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { HospedagemModule } from './hospedagem/hospedagem.module';
 import { ProdutoModule } from './produto/produto.module';
 import { ConsumoDiarioModule } from './consumo_diario/consumo_diario.module';
+import { QuartoModule } from './quarto/quarto.module';
 
 @Module({
-  imports: [HospedeModule, PrismaModule, HospedagemModule, ProdutoModule, ConsumoDiarioModule],
+  imports: [HospedeModule, PrismaModule, HospedagemModule, ProdutoModule, ConsumoDiarioModule, QuartoModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

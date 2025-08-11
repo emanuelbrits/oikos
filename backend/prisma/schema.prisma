@@ -28,11 +28,21 @@ model Hospede {
   Hospedagem  Hospedagem[]
 }
 
+model Quarto {
+  id          Int          @id @default(autoincrement())
+  numero      Int
+  tipo        String
+  valorDiaria Float
+  status      String
+  Hospedagem  Hospedagem[]
+}
+
 model Hospedagem {
   id              Int              @id @default(autoincrement())
   hospedeId       Int
   hospede         Hospede          @relation(fields: [hospedeId], references: [id], onDelete: Cascade)
-  numeroQuarto    Int
+  quartoId        Int
+  quarto          Quarto           @relation(fields: [quartoId], references: [id], onDelete: Cascade)
   dataHoraEntrada DateTime
   dataHoraSaida   DateTime
   valorDiaria     Float
