@@ -26,6 +26,7 @@ model Hospede {
   complemento String?
   criadoEm    DateTime     @default(dbgenerated("(datetime('now','-3 hours'))"))
   Hospedagem  Hospedagem[]
+  Reserva     Reserva[]
 }
 
 model Quarto {
@@ -35,6 +36,7 @@ model Quarto {
   valorDiaria Float
   status      String
   Hospedagem  Hospedagem[]
+  Reserva     Reserva[]
 }
 
 model Hospedagem {
@@ -73,4 +75,18 @@ model Consumo_diario {
   criadoEm       DateTime   @default(dbgenerated("(datetime('now','-3 hours'))"))
   hospedagem     Hospedagem @relation(fields: [hospedagemId], references: [id], onDelete: Cascade)
   produto        Produto    @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+}
+
+model Reserva {
+  id              Int      @id @default(autoincrement())
+  hospedeId       Int
+  hospede         Hospede  @relation(fields: [hospedeId], references: [id], onDelete: Cascade)
+  quartoId        Int
+  quarto          Quarto   @relation(fields: [quartoId], references: [id], onDelete: Cascade)
+  dataHoraInicial DateTime
+  dataHoraFinal   DateTime
+  formaPagamento  String
+  status          String
+  observacoes     String?
+  criadoEm        DateTime @default(dbgenerated("(datetime('now','-3 hours'))"))
 }

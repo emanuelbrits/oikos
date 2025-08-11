@@ -29,11 +29,11 @@ export class HospedagemService {
   }
 
   findAll() {
-    return this.prisma.hospedagem.findMany({ include: { hospede: true } });
+    return this.prisma.hospedagem.findMany({ include: { hospede: true, quarto: true } });
   }
 
   async findOne(id: number) {
-    const hospedagem = await this.prisma.hospedagem.findUnique({ where: { id }, include: { hospede: true } });
+    const hospedagem = await this.prisma.hospedagem.findUnique({ where: { id }, include: { hospede: true, quarto: true } });
     if (!hospedagem) throw new NotFoundException('Hospedagem não encontrada');
     return hospedagem;
   }
@@ -56,7 +56,7 @@ export class HospedagemService {
   async findByHospede(hospedeId: number) {
     const hospedagens = await this.prisma.hospedagem.findMany({
       where: { hospedeId },
-      include: { hospede: true },
+      include: { hospede: true, quarto: true },
     });
 
     if (hospedagens.length === 0) {
