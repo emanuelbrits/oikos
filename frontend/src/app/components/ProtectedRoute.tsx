@@ -23,7 +23,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   if (!token) {
-    return null; // opcional: já redirecionou, não mostra nada
+    return null;
   }
 
   return <>{children}</>;
