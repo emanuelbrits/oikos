@@ -5,17 +5,25 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { token } = useAuth();
+  const { token, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) {
+    if (!loading && !token) {
       router.push("/login");
     }
-  }, [token, router]);
+  }, [token, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   if (!token) {
-    return null;
+    return null; // opcional: já redirecionou, não mostra nada
   }
 
   return <>{children}</>;

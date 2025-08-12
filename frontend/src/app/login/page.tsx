@@ -39,14 +39,12 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen w-full bg-gray-100">
-      {/* Lado esquerdo - escondido em telas pequenas */}
       <div className="hidden md:flex flex-col items-center justify-center gap-12 text-center w-2/5 text-[var(--sunshine)] bg-[var(--mulberry)] min-h-screen">
         <TbHotelService className="w-64 h-64 rounded-full border-2 border-[var(--sunshine)] shadow-2xl p-12 bg-[var(--umemurasaki)]" />
         <h2 className="text-5xl">Gerenciador de Hospedagens</h2>
         <h2 className="text-6xl font-bold">Pousada Oikos</h2>
       </div>
 
-      {/* Formulário - ocupa full width em telas pequenas e 3/5 em md+ */}
       <form
         onSubmit={handleLogin}
         className="flex flex-col items-center justify-center bg-[var(--sunshine)] p-6 shadow-lg min-h-screen w-full md:w-3/5"
