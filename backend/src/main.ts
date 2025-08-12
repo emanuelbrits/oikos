@@ -6,6 +6,12 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -14,7 +20,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('API de Hóspedes')
-    .setDescription('CRUD para gerenciamento de hóspedes')
+    .setDescription('CRUD para gerenciamento de hóspedes e hospedagens')
     .setVersion('1.0')
     .build();
 
