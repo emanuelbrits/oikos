@@ -7,11 +7,38 @@ export class HospedeService {
   constructor(private prisma: PrismaService) { }
 
   async criar(data: Prisma.HospedeCreateInput) {
-    return this.prisma.hospede.create({ data });
+    try {
+      const hospede = await this.prisma.hospede.create({ data });
+      return {
+        success: true,
+        data: hospede,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar hóspede:", error);
+
+      let message = "Erro ao salvar o hóspede.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   async listar() {
-    return this.prisma.hospede.findMany();
+    return this.prisma.hospede.findMany({
+      orderBy: {
+        criadoEm: 'desc'
+      }
+    });
   }
 
   async buscarPorId(id: number) {
@@ -33,7 +60,30 @@ export class HospedeService {
   }
 
   async atualizar(id: number, data: Prisma.HospedeUpdateInput) {
-    return this.prisma.hospede.update({ where: { id }, data });
+    try {
+      const hospede = await this.prisma.hospede.update({ where: { id }, data });
+      return {
+        success: true,
+        data: hospede,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar hóspede:", error);
+
+      let message = "Erro ao salvar o hóspede.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   async deletar(id: number) {

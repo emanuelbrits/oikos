@@ -7,14 +7,14 @@ interface AuthContextType {
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
-  loading: boolean;  // novo estado para controle
+  loading: boolean;  
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);  // true até verificar o localStorage
+  const [loading, setLoading] = useState(true); 
   const router = useRouter();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (savedToken) {
       setToken(savedToken);
     }
-    setLoading(false);  // terminou de checar
+    setLoading(false);
   }, []);
 
   const login = (newToken: string) => {

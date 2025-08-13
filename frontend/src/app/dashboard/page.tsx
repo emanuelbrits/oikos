@@ -8,6 +8,10 @@ import { useEffect, useState } from "react";
 import { getHospedagens, Hospedagem } from "../services/hospedagensService";
 import { getHospedes, Hospede } from "../services/hospedesService";
 import { getReservas, Reserva } from "../services/reservasService";
+import { TbHotelService } from "react-icons/tb";
+import { IoIosPerson } from "react-icons/io";
+import { LuClock4, LuCupSoda } from "react-icons/lu";
+import { MdOutlineShoppingCart } from "react-icons/md";
 
 export default function DashboardPage() {
   const { token, logout } = useAuth();
@@ -19,12 +23,17 @@ export default function DashboardPage() {
     if (token) {
       getHospedagens(token).then(setHospedagens).catch(console.error);
       getHospedes(token).then(setHospedes).catch(console.error);
-      getReservas(token).then(setReservas).catch(console.error);   
+      getReservas(token).then(setReservas).catch(console.error);
     }
   }, [token]);
 
   const sidebarItems = [
     { label: "Início", icon: FiHome, href: "/" },
+    { label: "Hospedagens", icon: TbHotelService, href: "/hospedagem" },
+    { label: "Hóspedes", icon: IoIosPerson, href: "/hospedes" },
+    { label: "Reservas", icon: LuClock4, href: "/reservas" },
+    { label: "Consumos", icon: MdOutlineShoppingCart, href: "/consumo-diario" },
+    { label: "Produtos", icon: LuCupSoda, href: "/produtos" },
     {
       label: "Sair",
       icon: FiLogOut,
@@ -62,6 +71,12 @@ export default function DashboardPage() {
               ) : (
                 <p className="text-gray-500">Nenhuma hospedagem encontrada.</p>
               )}
+
+              <div className="flex justify-end">
+                <button className="mt-4 bg-[var(--mulberry)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                  Ver todos
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -82,6 +97,12 @@ export default function DashboardPage() {
                 ) : (
                   <p className="text-gray-500">Nenhum hóspede encontrado.</p>
                 )}
+
+                <div className="flex justify-end">
+                  <button className="mt-4 bg-[var(--mulberry)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                    Ver todos
+                  </button>
+                </div>
               </div>
 
               <div className="bg-white shadow-xl rounded-xl p-6">
@@ -95,14 +116,20 @@ export default function DashboardPage() {
                     {reservas.slice(0, 5).map((r) => (
                       <li key={r.id} className="border-b pb-2">
                         <span className="font-medium">{r.hospede.nome}</span> - Quarto{" "}
-                      {r.quarto.numero} - Entrada:{" "}
-                      {new Date(r.dataHoraInicial).toLocaleDateString("pt-BR")}
+                        {r.quarto.numero} - Entrada:{" "}
+                        {new Date(r.dataHoraInicial).toLocaleDateString("pt-BR")}
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <p className="text-gray-500">Nenhuma reserva encontrada.</p>
                 )}
+
+                <div className="flex justify-end">
+                  <button onClick={() => {}} className="mt-4 bg-[var(--mulberry)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                    Ver todos
+                  </button>
+                </div>
               </div>
             </div>
           </div>
