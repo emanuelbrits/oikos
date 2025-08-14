@@ -63,10 +63,10 @@ export default function QuartosPage() {
                 <main className="flex-1 ml-0 p-6">
                     <h1 className="text-5xl text-[var(--navy)] font-semibold mb-6">Quartos</h1>
 
-                    <div className="flex gap-2 mb-6">
+                    <div className="flex justify-end gap-2 mb-6">
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg flex items-center justify-center hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
+                            className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg flex items-center justify-center hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
                         >
                             <MdAdd size={24} /> Quarto
                         </button>

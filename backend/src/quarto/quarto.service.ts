@@ -7,8 +7,31 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class QuartoService {
   constructor(private prisma: PrismaService) { }
 
-  create(data: CreateQuartoDto) {
-    return this.prisma.quarto.create({ data });
+  async create(data: CreateQuartoDto) {
+    try {
+      const quarto = await this.prisma.quarto.create({ data });
+      return {
+        success: true,
+        data: quarto,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar quarto:", error);
+
+      let message = "Erro ao salvar o quarto.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   findAll() {
