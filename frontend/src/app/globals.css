@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --umemurasaki: #8C3E53;
-  --mulberry: #590835;
+  --seaBlue: #034C8C;
+  --navy: #073359;
   --spray: #82D0D9;
-  --sunshine: #F2CA80;
+  --sunshine: #F2AB27;
   --geranium: #D96C6C;
 }

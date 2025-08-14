@@ -117,7 +117,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-            <div className="bg-gray-100 border-t-8 border-[var(--mulberry)] p-6 rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-100 border-t-8 border-[var(--navy)] p-6 rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <h2 className="text-lg font-bold text-gray-800 mb-4">Adicionar Hóspede</h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -128,7 +128,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="ex.: João Neto"
                             value={nome}
                             onChange={(e) => setNome(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
 
@@ -139,7 +139,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="xxx.xxx.xxx-xx"
                             value={cpf}
                             onChange={(e) => setCpf(formatCPF(e.target.value))}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -152,7 +152,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="exemplo@email.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
 
@@ -164,7 +164,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             value={formatTelefone(telefone)}
                             onChange={handleChange}
                             onKeyDown={handleKeyDown}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -176,7 +176,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                         placeholder="ex.: Engenheiro"
                         value={profissao}
                         onChange={(e) => setProfissao(e.target.value)}
-                        className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                        className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                     />
                 </div>
 
@@ -188,7 +188,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="ex.: Centro"
                             value={bairro}
                             onChange={(e) => setBairro(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
 
@@ -199,7 +199,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="ex.: Rua das Flores"
                             value={rua}
                             onChange={(e) => setRua(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -212,7 +212,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="ex.: Apartamento 101"
                             value={complemento}
                             onChange={(e) => setComplemento(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -225,7 +225,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="ex.: São Paulo"
                             value={cidade}
                             onChange={(e) => setCidade(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
 
@@ -236,7 +236,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                             placeholder="ex.: SP"
                             value={estado}
                             onChange={(e) => setEstado(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -254,7 +254,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-4 py-2 rounded-lg bg-[var(--mulberry)] text-white hover:bg-[var(--mulberry)]/90 transition-colors cursor-pointer"
+                        className="px-4 py-2 rounded-lg bg-[var(--navy)] text-white hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
                     >
                         Salvar
                     </button>

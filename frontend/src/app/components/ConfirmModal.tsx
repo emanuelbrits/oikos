@@ -47,7 +47,7 @@ export default function ConfirmModal({
                             onConfirm();
                             onClose();
                         }}
-                        className="px-4 py-2 rounded-lg bg-[var(--mulberry)]/80 hover:bg-[var(--mulberry)] text-white transition-colors duration-200 cursor-pointer"
+                        className="px-4 py-2 rounded-lg bg-[var(--navy)]/80 hover:bg-[var(--navy)] text-white transition-colors duration-200 cursor-pointer"
                     >
                         Confirmar
                     </button>

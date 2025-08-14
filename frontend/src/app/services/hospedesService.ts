@@ -88,7 +88,6 @@ export async function createHospede(token: string, hospedeData: any) {
   }
 }
 
-
 export async function updateHospede(token: string, id: number, hospedeData: any) {
   try {
     const res = await fetch(`${API_URL}/hospedes/${id}`, {

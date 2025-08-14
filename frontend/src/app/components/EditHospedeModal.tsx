@@ -142,14 +142,14 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/10 z-50 p-4">
-            <div className="bg-gray-100 border-t-8 border-[var(--mulberry)] p-6 rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-100 border-t-8 border-[var(--navy)] p-6 rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <h2 className="text-lg font-bold text-gray-800 mb-4">Editar Hóspede</h2>
 
                 {/* Inputs - igual ao modal de adicionar */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Nome</label>
-                        <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                        <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">CPF</label>
@@ -158,7 +158,7 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
                             placeholder="xxx.xxx.xxx-xx"
                             value={formatCPF(cpf)}
                             onChange={(e) => setCpf(formatCPF(e.target.value))}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -166,7 +166,7 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">E-mail</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">Telefone</label>
@@ -176,7 +176,7 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
                             value={formatTelefone(telefone)}
                             onChange={handleChangeTelefone}
                             onKeyDown={handleKeyDown}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
                 </div>
@@ -184,33 +184,33 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
                 {/* Demais campos */}
                 <div className="mb-4">
                     <label className="block mb-1 text-sm font-medium">Profissão</label>
-                    <input type="text" value={profissao} onChange={(e) => setProfissao(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                    <input type="text" value={profissao} onChange={(e) => setProfissao(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Bairro</label>
-                        <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                        <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">Rua</label>
-                        <input type="text" value={rua} onChange={(e) => setRua(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                        <input type="text" value={rua} onChange={(e) => setRua(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                 </div>
 
                 <div className="mb-4">
                     <label className="block mb-1 text-sm font-medium">Complemento</label>
-                    <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                    <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Cidade</label>
-                        <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                        <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">Estado</label>
-                        <input type="text" value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--mulberry)]/20" />
+                        <input type="text" value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                 </div>
 
@@ -218,7 +218,7 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
 
                 <div className="flex justify-end gap-4">
                     <button onClick={onClose} className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition-colors cursor-pointer">Cancelar</button>
-                    <button onClick={handleSave} className="px-4 py-2 rounded-lg bg-[var(--mulberry)] text-white hover:bg-[var(--mulberry)]/90 transition-colors cursor-pointer">Salvar</button>
+                    <button onClick={handleSave} className="px-4 py-2 rounded-lg bg-[var(--navy)] text-white hover:bg-[var(--navy)]/90 transition-colors cursor-pointer">Salvar</button>
                 </div>
             </div>
         </div>

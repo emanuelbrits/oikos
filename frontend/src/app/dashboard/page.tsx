@@ -1,6 +1,5 @@
 "use client";
 
-import { FiHome, FiLogOut } from "react-icons/fi";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/AuthContext";
@@ -8,13 +7,9 @@ import { useEffect, useState } from "react";
 import { getHospedagens, Hospedagem } from "../services/hospedagensService";
 import { getHospedes, Hospede } from "../services/hospedesService";
 import { getReservas, Reserva } from "../services/reservasService";
-import { TbHotelService } from "react-icons/tb";
-import { IoIosPerson } from "react-icons/io";
-import { LuClock4, LuCupSoda } from "react-icons/lu";
-import { MdOutlineShoppingCart } from "react-icons/md";
 
 export default function DashboardPage() {
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
   const [hospedagens, setHospedagens] = useState<Hospedagem[]>([]);
   const [hospedes, setHospedes] = useState<Hospede[]>([]);
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -27,26 +22,10 @@ export default function DashboardPage() {
     }
   }, [token]);
 
-  const sidebarItems = [
-    { label: "Início", icon: FiHome, href: "/" },
-    { label: "Hospedagens", icon: TbHotelService, href: "/hospedagem" },
-    { label: "Hóspedes", icon: IoIosPerson, href: "/hospedes" },
-    { label: "Reservas", icon: LuClock4, href: "/reservas" },
-    { label: "Consumos", icon: MdOutlineShoppingCart, href: "/consumo-diario" },
-    { label: "Produtos", icon: LuCupSoda, href: "/produtos" },
-    {
-      label: "Sair",
-      icon: FiLogOut,
-      onClick: () => {
-        logout();
-      },
-    },
-  ];
-
   return (
     <ProtectedRoute>
       <div className="flex min-h-screen bg-[var(--sunshine)]">
-        <Sidebar title="Oikos" items={sidebarItems} />
+        <Sidebar title="Oikos"/>
 
         <main className="flex-1 ml-0 p-6">
           <h1 className="text-4xl font-bold mb-6">Bem-vindo</h1>
@@ -73,7 +52,7 @@ export default function DashboardPage() {
               )}
 
               <div className="flex justify-end">
-                <button className="mt-4 bg-[var(--mulberry)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                <button className="mt-4 bg-[var(--navy)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
                   Ver todos
                 </button>
               </div>
@@ -99,7 +78,7 @@ export default function DashboardPage() {
                 )}
 
                 <div className="flex justify-end">
-                  <button className="mt-4 bg-[var(--mulberry)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                  <button className="mt-4 bg-[var(--navy)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
                     Ver todos
                   </button>
                 </div>
@@ -126,7 +105,7 @@ export default function DashboardPage() {
                 )}
 
                 <div className="flex justify-end">
-                  <button onClick={() => {}} className="mt-4 bg-[var(--mulberry)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                  <button onClick={() => {}} className="mt-4 bg-[var(--navy)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
                     Ver todos
                   </button>
                 </div>

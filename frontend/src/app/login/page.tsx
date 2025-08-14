@@ -39,10 +39,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen w-full bg-gray-100">
-      <div className="hidden md:flex flex-col items-center justify-center gap-12 text-center w-2/5 text-[var(--sunshine)] bg-[var(--mulberry)] min-h-screen">
-        <TbHotelService className="w-64 h-64 rounded-full border-2 border-[var(--sunshine)] shadow-2xl p-12 bg-[var(--umemurasaki)]" />
+      <div className="hidden md:flex flex-col items-center justify-center gap-12 text-center w-2/5 text-[var(--sunshine)] bg-[var(--navy)] min-h-screen">
+        <TbHotelService className="w-64 h-64 rounded-full border-2 border-[var(--sunshine)] shadow-2xl p-12 bg-[var(--seaBlue)]" />
         <h2 className="text-5xl">Gerenciador de Hospedagens</h2>
-        <h2 className="text-6xl font-bold">Pousada Oikos</h2>
       </div>
 
       <form
@@ -50,13 +49,13 @@ export default function LoginPage() {
         className="flex flex-col items-center justify-center bg-[var(--sunshine)] p-6 shadow-lg min-h-screen w-full md:w-3/5"
       >
         <div className="flex flex-col gap-8 w-full max-w-md">
-          <h1 className="text-5xl font-bold mb-4 text-center text-[var(--mulberry)]">Pousada Oikos</h1>
+          <h1 className="text-5xl font-bold mb-4 text-center text-[var(--navy)]">Oikos Pousada</h1>
           
           <div className="flex flex-col gap-3">
-            <label htmlFor="username" className="text-3xl font-bold text-[var(--mulberry)]">E-mail</label>
+            <label htmlFor="username" className="text-3xl font-bold text-[var(--navy)]">E-mail</label>
             <div className="flex">
               <div className="flex items-center justify-center bg-gray-100 px-3 rounded-l-2xl">
-                <CiMail className="text-[var(--mulberry)] text-3xl" />
+                <CiMail className="text-[var(--navy)] text-3xl" />
               </div>
               <input
                 id="username"
@@ -70,12 +69,12 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <label htmlFor="password" className="text-3xl font-bold text-[var(--mulberry)]">
+            <label htmlFor="password" className="text-3xl font-bold text-[var(--navy)]">
               Senha
             </label>
             <div className="flex">
               <div className="flex items-center justify-center bg-gray-100 px-3 rounded-l-2xl">
-                <IoLockClosedOutline className="text-[var(--mulberry)] text-3xl" />
+                <IoLockClosedOutline className="text-[var(--navy)] text-3xl" />
               </div>
               <input
                 id="password"
@@ -100,7 +99,7 @@ export default function LoginPage() {
                       exit={{ opacity: 0, scale: 0.8, rotate: 15 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <RiEyeLine className="text-[var(--mulberry)] text-3xl" />
+                      <RiEyeLine className="text-[var(--navy)] text-3xl" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -110,7 +109,7 @@ export default function LoginPage() {
                       exit={{ opacity: 0, scale: 0.8, rotate: -15 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <RiEyeCloseLine className="text-[var(--mulberry)] text-3xl" />
+                      <RiEyeCloseLine className="text-[var(--navy)] text-3xl" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -124,7 +123,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-[var(--umemurasaki)] text-[var(--sunshine)] text-3xl font-bold py-4 rounded shadow-xl hover:bg-[var(--mulberry)] cursor-pointer transition-colors duration-300"
+            className="w-full bg-[var(--seaBlue)] text-[var(--sunshine)] text-3xl font-bold py-4 rounded shadow-xl hover:bg-[var(--navy)] cursor-pointer transition-colors duration-300"
           >
             ENTRAR
           </button>
