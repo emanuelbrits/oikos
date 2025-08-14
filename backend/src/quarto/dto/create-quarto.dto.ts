@@ -25,14 +25,6 @@ export class CreateQuartoDto {
     valorDiaria: number;
 
     @ApiProperty({
-        example: "suíte",
-        description: "Tipo do quarto (ex.: suíte, standard, luxo)"
-    })
-    @IsNotEmpty()
-    @IsString()
-    tipo: string;
-
-    @ApiProperty({
         example: "disponível",
         description: "Status atual do quarto (ex.: disponível, ocupado, manutenção)"
     })

@@ -4,7 +4,6 @@ export interface Quarto {
   id?: number;
   numero: number;
   valorDiaria: number;
-  tipo: string;
   status: string;
 }
 

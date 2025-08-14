@@ -12,7 +12,6 @@ interface AddQuartoModalProps {
 export default function AddQuartoModal({ isOpen, onClose }: AddQuartoModalProps) {
     const { token } = useAuth();
     const [numero, setNumero] = useState("");
-    const [tipo, setTipo] = useState("");
     const [valorDiaria, setValorDiaria] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -33,7 +32,7 @@ export default function AddQuartoModal({ isOpen, onClose }: AddQuartoModalProps)
     const handleSave = async () => {
         if (!token) return;
 
-        const camposObrigatorios = { numero, tipo, valorDiaria };
+        const camposObrigatorios = { numero, valorDiaria };
         const camposVazios = Object.entries(camposObrigatorios).filter(([_, valor]) => !valor.trim());
 
         if (camposVazios.length > 0) {
@@ -44,9 +43,8 @@ export default function AddQuartoModal({ isOpen, onClose }: AddQuartoModalProps)
         try {
             const response = await createQuarto(token, {
                 numero,
-                tipo,
                 valorDiaria: Number(valorDiaria),
-                status: "disponível"
+                status: "Disponível"
             });
 
             if (response.success) {
@@ -75,24 +73,6 @@ export default function AddQuartoModal({ isOpen, onClose }: AddQuartoModalProps)
                             onChange={(e) => setNumero(e.target.value)}
                             className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
-                    </div>
-                    <div>
-                        <label className="block mb-1 text-sm font-medium">Tipo</label>
-                        <div className="flex gap-4">
-                            {["Standard", "Luxo", "Suíte"].map((opcao) => (
-                                <label key={opcao} className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        name="tipo"
-                                        value={opcao}
-                                        checked={tipo === opcao}
-                                        onChange={(e) => setTipo(e.target.value)}
-                                        className="accent-[var(--navy)]"
-                                    />
-                                    <span className="text-gray-700">{opcao}</span>
-                                </label>
-                            ))}
-                        </div>
                     </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">Preço da diária</label>

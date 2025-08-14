@@ -34,7 +34,6 @@ model Hospede {
 model Quarto {
   id          Int          @id @default(autoincrement())
   numero      Int
-  tipo        String
   valorDiaria Float
   status      String
   Hospedagem  Hospedagem[]

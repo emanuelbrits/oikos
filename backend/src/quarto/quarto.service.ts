@@ -29,11 +29,31 @@ export class QuartoService {
     });
   }
 
-  update(id: number, updateQuartoDto: UpdateQuartoDto) {
-    return this.prisma.quarto.update({
-      where: { id },
-      data: updateQuartoDto,
-    });
+  async update(id: number, updateQuartoDto: UpdateQuartoDto) {
+    try {
+      const quarto = await this.prisma.quarto.update({ where: { id }, data: updateQuartoDto });
+      return {
+        success: true,
+        data: quarto,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar quarto:", error);
+
+      let message = "Erro ao salvar o quarto.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   remove(id: number) {

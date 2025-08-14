@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import { deleteQuarto, getQuartos, getQuartosByNumber, Quarto } from "../services/quartosService";
 import { useAuth } from "../contexts/AuthContext";
-import { FiHome, FiLogOut } from "react-icons/fi";
-import { MdAdd, MdBedroomParent, MdDelete, MdEdit } from "react-icons/md";
-import { TbHotelService } from "react-icons/tb";
+import { MdAdd, MdDelete, MdEdit } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
 import ConfirmModal from "../components/ConfirmModal";
@@ -60,19 +58,12 @@ export default function QuartosPage() {
     return (
         <ProtectedRoute>
             <div className="flex min-h-screen bg-[var(--sunshine)]">
-                <Sidebar title="Oikos"/>
+                <Sidebar title="Oikos" />
 
                 <main className="flex-1 ml-0 p-6">
                     <h1 className="text-5xl text-[var(--navy)] font-semibold mb-6">Quartos</h1>
 
                     <div className="flex gap-2 mb-6">
-                        <input
-                            type="text"
-                            placeholder="Buscar quartos..."
-                            value={busca}
-                            onChange={(e) => setBusca(e.target.value)}
-                            className="bg-gray-100 border-1 border-[var(--navy)]/50 rounded-lg py-2 px-4 w-full"
-                        />
                         <button
                             onClick={() => setIsAddModalOpen(true)}
                             className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg flex items-center justify-center hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
@@ -86,71 +77,84 @@ export default function QuartosPage() {
                     </div>
 
                     {quartos.length === 0 ? (
-                        <p className="text-gray-500">Nenhum quarto encontrado.</p>
+                        <p className="text-gray-500">Nenhum hóspede encontrado.</p>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {quartos.map((quarto) => (
-                                <div
-                                    key={quarto.id}
-                                    className="bg-gray-100 shadow-lg rounded-xl p-6 pt-4 flex flex-col justify-between border-t-4 border-[var(--navy)]"
-                                >
-                                    <div className="flex justify-between items-center p-2 bg-[var(--sunshine)]/20 rounded-2xl border-1 border-[var(--navy)]/20">
-                                        <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">
-                                            Quarto {quarto.numero}
-                                        </h2>
-                                        <div className="flex justify-between items-center gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setQuartoEditSelecionado(quarto);
-                                                    setIsEditingModalOpen(true);
-                                                }}
-                                                className="w-full bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
-                                            >
-                                                <MdEdit />
-                                            </button>
-                                            {quartoEditSelecionado && (
-                                                <EditQuartoModal
-                                                    isOpen={isEditingModalOpen}
-                                                    onClose={() => { carregarQuartos(); setIsEditingModalOpen(false); }}
-                                                    quarto={quartoEditSelecionado}
-                                                />
-                                            )}
-                                            <button
-                                                onClick={() => {
-                                                    setQuartoSelecionado(quarto.id || null);
-                                                    setModalOpen(true);
-                                                }}
-                                                className="w-full bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
-                                            >
-                                                <MdDelete />
-                                            </button>
-                                            <ConfirmModal
-                                                isOpen={modalOpen}
-                                                onClose={() => setModalOpen(false)}
-                                                onConfirm={() => quartoSelecionado && removerQuarto(quartoSelecionado)}
-                                                title="Excluir quarto"
-                                                message="Tem certeza que deseja remover este quarto? Essa ação não poderá ser desfeita."
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col space-y-3 mt-2">
-                                        <p className="text-gray-600">Tipo: {quarto.tipo}</p>
-                                        <p className="text-gray-600">Preço: R$ {quarto.valorDiaria}</p>
-                                        <p
-                                            className={`px-2 py-1 rounded-full text-white font-semibold ${quarto.status === "Disponível"
-                                                ? "bg-green-600"
-                                                : quarto.status === "Ocupado"
-                                                    ? "bg-yellow-500"
-                                                    : quarto.status === "Manutenção"
-                                                        ? "bg-red-600"
-                                                        : "bg-gray-400"
-                                                }`}
-                                        >
-                                            Status: {quarto.status}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full border border-gray-200 rounded-lg">
+                                <thead className="bg-[var(--navy)] text-[var(--sunshine)]">
+                                    <tr>
+                                        <th className="text-center px-4 py-2">Número</th>
+                                        <th className="text-center px-4 py-2">Status</th>
+                                        <th className="text-center px-4 py-2">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {quartos.map((quarto) => (
+                                        <tr key={quarto.id}>
+                                            <td className="px-4 text-center py-2">{quarto.numero}</td>
+                                            <td className="px-4 text-center py-2">
+                                                <span
+                                                    className={`inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full w-[8rem] ${quarto.status === "Disponível"
+                                                        ? "bg-green-100 text-green-800 border-1 border-green-800 dark:bg-green-900 dark:text-green-300"
+                                                        : quarto.status === "Ocupado"
+                                                            ? "bg-yellow-100 text-yellow-800 border-1 border-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                                                            : quarto.status === "Manutenção"
+                                                                ? "bg-red-100 text-red-800 border-1 border-red-800 dark:bg-red-900 dark:text-red-300"
+                                                                : "bg-gray-100 text-gray-800 border-1 border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                                                        }`}
+                                                >
+                                                    <span className={`w-2 h-2 me-1 rounded-full ${quarto.status === "Disponível"
+                                                        ? "bg-green-500"
+                                                        : quarto.status === "Ocupado"
+                                                            ? "bg-yellow-500"
+                                                            : quarto.status === "Manutenção"
+                                                                ? "bg-red-500"
+                                                                : "bg-gray-500"
+                                                        }`}></span>
+                                                    {quarto.status}
+                                                </span>
+                                            </td>
+                                            <td className="flex flex-wrap justify-center px-4 py-2 gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setQuartoEditSelecionado(quarto);
+                                                        setIsEditingModalOpen(true);
+                                                    }}
+                                                    className=" bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                >
+                                                    <MdEdit />
+                                                </button>
+
+                                                <button
+                                                    onClick={() => {
+                                                        setQuartoSelecionado(quarto.id || null);
+                                                        setModalOpen(true);
+                                                    }}
+                                                    className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                >
+                                                    <MdDelete />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {quartoEditSelecionado && (
+                                <EditQuartoModal
+                                    isOpen={isEditingModalOpen}
+                                    onClose={() => { carregarQuartos(); setIsEditingModalOpen(false); }}
+                                    quarto={quartoEditSelecionado}
+                                />
+                            )}
+
+                            <ConfirmModal
+                                isOpen={modalOpen}
+                                onClose={() => setModalOpen(false)}
+                                onConfirm={() => quartoSelecionado && removerQuarto(quartoSelecionado)}
+                                title="Excluir quarto"
+                                message="Tem certeza que deseja remover este quarto? Essa ação não poderá ser desfeita."
+                            />
                         </div>
                     )}
                 </main>
