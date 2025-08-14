@@ -12,15 +12,18 @@ import ConfirmModal from "../components/ConfirmModal";
 import AddHospedeModal from "../components/AddHospedeModal";
 import EditHospedeModal from "../components/EditHospedeModal";
 import LoadingScreen from "../components/loadingScreen";
+import HospedeModal from "../components/hospedeModal";
 
 export default function HospedesPage() {
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+    const [isHospedeModalOpen, setIsHospedeModalOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
-    const [hospedeSelecionado, setHospedeSelecionado] = useState<number | null>(null);
+    const [hospedeSelecionado, setHospedeSelecionado] = useState<Hospede | null>(null);
     const [hospedeEditSelecionado, setHospedeEditSelecionado] = useState<Hospede | null>(null);
+    const [hospedeRemoveSelecionado, setHospedeRemoveSelecionado] = useState<number | null>(null);
     const [buscaNome, setBuscaNome] = useState("");
     const [buscaCPF, setBuscaCPF] = useState("");
     const nomeRef = useRef<HTMLInputElement>(null);
@@ -213,9 +216,9 @@ export default function HospedesPage() {
                                                 <button
                                                     onClick={() => {
                                                         if (typeof hospede.id === "number") {
-                                                            setHospedeSelecionado(hospede.id);
+                                                            setHospedeRemoveSelecionado(hospede.id);
                                                         } else {
-                                                            setHospedeSelecionado(null);
+                                                            setHospedeRemoveSelecionado(null);
                                                         }
                                                         setModalOpen(true);
                                                     }}
@@ -226,7 +229,7 @@ export default function HospedesPage() {
                                                 <ConfirmModal
                                                     isOpen={modalOpen}
                                                     onClose={() => setModalOpen(false)}
-                                                    onConfirm={() => hospedeSelecionado && removerHospede(hospedeSelecionado)}
+                                                    onConfirm={() => hospedeRemoveSelecionado && removerHospede(hospedeRemoveSelecionado)}
                                                     title="Excluir hóspede"
                                                     message="Tem certeza que deseja remover este hóspede? Essa ação não poderá ser desfeita."
                                                 />
@@ -256,6 +259,28 @@ export default function HospedesPage() {
                                                     <p className="text-gray-600">{hospede.bairro}, {hospede.rua}, {hospede.complemento} - {hospede.cidade}/{hospede.estado}</p>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div className="flex mt-2 justify-center">
+                                            <button
+                                                onClick={() => {
+                                                    if (typeof hospede.id === "number") {
+                                                        setHospedeSelecionado(hospede);
+                                                    } else {
+                                                        setHospedeSelecionado(null);
+                                                    }
+                                                    setIsHospedeModalOpen(true);
+                                                }}
+                                                className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer w-full md:w-auto h-[3.125rem] flex items-center justify-center">Ver detalhes
+                                            </button>
+                                            {hospedeSelecionado && (<HospedeModal
+                                                isOpen={isHospedeModalOpen}
+                                                onClose={(edited, deleted, hospede) => {
+                                                    setIsHospedeModalOpen(false);
+                                                    if (edited) setHospedes([...hospedes.filter(h => h.id !== hospede.id), hospede]);
+                                                    if (deleted) setHospedes(hospedes.filter(h => h.id !== hospede.id));
+                                                }}
+                                                hospede={hospedeSelecionado}
+                                            />)}
                                         </div>
                                     </div>
                                 </div>

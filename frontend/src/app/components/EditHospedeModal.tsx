@@ -20,8 +20,8 @@ export interface Hospede {
 interface EditHospedeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: () => void;
     hospede: Hospede;
+    onSave: (hospede: Hospede) => void;
 }
 
 export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: EditHospedeModalProps) {
@@ -38,7 +38,6 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
     const [estado, setEstado] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
 
-    // Preenche os campos quando o modal abrir
     useEffect(() => {
         if (isOpen && hospede) {
             setNome(hospede.nome);
@@ -93,7 +92,19 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
                 return;
             }
 
-            onSave();
+            onSave({
+                id: hospede.id,
+                nome,
+                cpf: cpf.replace(/\D/g, ""),
+                email,
+                telefone: telefone.replace(/\D/g, ""),
+                profissao,
+                rua,
+                bairro,
+                cidade,
+                estado,
+                complemento,
+            });
         } catch (error) {
             console.error("Erro ao atualizar hóspede:", error);
             setErrorMsg("Ocorreu um erro inesperado. Tente novamente.");
