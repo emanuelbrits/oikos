@@ -56,6 +56,9 @@ export class HospedeService {
           contains: nome.toLowerCase(),
         },
       },
+      orderBy: {
+        nome: 'asc'
+      }
     });
   }
 
@@ -67,9 +70,12 @@ export class HospedeService {
     return this.prisma.hospede.findMany({
       where: {
         cpf: {
-          equals: cpf,
+          contains: cpf,
         },
       },
+      orderBy: {
+        nome: 'asc'
+      }
     });
   }
 

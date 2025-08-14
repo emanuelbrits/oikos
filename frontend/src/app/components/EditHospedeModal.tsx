@@ -20,10 +20,11 @@ export interface Hospede {
 interface EditHospedeModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSave: () => void;
     hospede: Hospede;
 }
 
-export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospedeModalProps) {
+export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: EditHospedeModalProps) {
     const { token } = useAuth();
     const [nome, setNome] = useState("");
     const [cpf, setCpf] = useState("");
@@ -92,7 +93,7 @@ export default function EditHospedeModal({ isOpen, onClose, hospede }: EditHospe
                 return;
             }
 
-            onClose();
+            onSave();
         } catch (error) {
             console.error("Erro ao atualizar hóspede:", error);
             setErrorMsg("Ocorreu um erro inesperado. Tente novamente.");

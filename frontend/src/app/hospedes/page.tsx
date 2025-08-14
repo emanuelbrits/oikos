@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { deleteHospede, getHospedes, getHospedesByName, Hospede } from "../services/hospedesService";
+import { useEffect, useRef, useState } from "react";
+import { deleteHospede, getHospedes, getHospedesByCPF, getHospedesByName, Hospede } from "../services/hospedesService";
 import { useAuth } from "../contexts/AuthContext";
-import { FiHome, FiLogOut, FiX } from "react-icons/fi";
-import { IoIosPerson } from "react-icons/io";
-import { LuClock4, LuCupSoda } from "react-icons/lu";
-import { MdAdd, MdBedroomParent, MdContactPage, MdDelete, MdEdit, MdOutlineShoppingCart } from "react-icons/md";
-import { TbHotelService } from "react-icons/tb";
+import { MdAdd, MdContactPage, MdDelete, MdEdit } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
 import { FaInfo } from "react-icons/fa";
@@ -25,20 +21,33 @@ export default function HospedesPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [hospedeSelecionado, setHospedeSelecionado] = useState<number | null>(null);
     const [hospedeEditSelecionado, setHospedeEditSelecionado] = useState<Hospede | null>(null);
-    const [busca, setBusca] = useState("");
-    const { token, logout } = useAuth();
+    const [buscaNome, setBuscaNome] = useState("");
+    const [buscaCPF, setBuscaCPF] = useState("");
+    const nomeRef = useRef<HTMLInputElement>(null);
+    const { token } = useAuth();
+
+    useEffect(() => {
+        nomeRef.current?.focus();
+    }, []);
 
     useEffect(() => {
         carregarHospedes()
     }, [token]);
 
-    useEffect(() => {
-        if (busca.trim() && token) {
-            getHospedesByName(token, busca).then(setHospedes);
-        } else {
-            carregarHospedes();
-        }
-    }, [busca]);
+    const buscarPorNome = () => {
+        setBuscaCPF("");
+        carregarHospedes();
+        if (!buscaNome.trim() || !token) return;
+        console.log("Buscando por nome:", buscaNome);
+        getHospedesByName(token, buscaNome).then(setHospedes);
+    };
+
+    const buscarPorCPF = () => {
+        setBuscaNome("");
+        carregarHospedes();
+        if (!buscaCPF.trim() || !token) return;
+        getHospedesByCPF(token, buscaCPF.replace(/\D/g, "")).then(setHospedes);
+    };
 
     const carregarHospedes = async () => {
         if (token)
@@ -95,33 +104,73 @@ export default function HospedesPage() {
     return (
         <ProtectedRoute>
             <div className="flex min-h-screen bg-[var(--sunshine)]">
-                <Sidebar title="Oikos"/>
+                <Sidebar title="Oikos" />
 
                 <main className="flex-1 ml-0 p-6">
                     <h1 className="text-5xl text-[var(--navy)] font-semibold mb-6">Hóspedes</h1>
 
                     <div>
-                        <div className="flex gap-2 mb-6">
-                            <input
-                                type="text"
-                                placeholder="Buscar hóspedes..."
-                                value={busca}
-                                onChange={(e) => setBusca(e.target.value)}
-                                className="bg-gray-100 border-1 border-[var(--navy)]/50 rounded-lg py-2 px-4 w-full"
-                            />
+                        <div className="flex flex-col md:flex-row gap-4 mb-6 text-[var(--navy)] text-2xl w-full">
+                            <div className="flex flex-col flex-1 gap-2">
+                                <label htmlFor="nome">Buscar pelo nome</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        ref={nomeRef}
+                                        type="text"
+                                        placeholder="Buscar..."
+                                        name="nome"
+                                        value={buscaNome}
+                                        onChange={(e) => setBuscaNome(e.target.value)}
+                                        className="bg-gray-100 border border-[var(--navy)]/50 rounded-lg py-2 px-4 w-full"
+                                    />
+                                    <button
+                                        onClick={buscarPorNome}
+                                        className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer h-[3.125rem]"
+                                    >
+                                        Buscar
+                                    </button>
+                                </div>
+                            </div>
 
-                            <button
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg flex items-center justify-center hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
-                            >
-                                <MdAdd size={24} /> Hóspede
-                            </button>
+                            <div className="flex flex-col flex-1 gap-2">
+                                <label htmlFor="cpf">Buscar pelo CPF</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar..."
+                                        value={buscaCPF}
+                                        name="cpf"
+                                        onChange={(e) => setBuscaCPF(formatCPF(e.target.value))}
+                                        className="bg-gray-100 border border-[var(--navy)]/50 rounded-lg py-2 px-4 w-full"
+                                    />
+                                    <button
+                                        onClick={buscarPorCPF}
+                                        className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer h-[3.125rem]"
+                                    >
+                                        Buscar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col justify-end w-full md:w-auto">
+                                <button
+                                    onClick={() => setIsAddModalOpen(true)}
+                                    className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer w-full md:w-auto h-[3.125rem] flex items-center justify-center"
+                                >
+                                    <MdAdd size={24} /> Hóspede
+                                </button>
+                            </div>
+
                         </div>
-
                         <AddHospedeModal
                             isOpen={isAddModalOpen}
-                            onClose={() => { carregarHospedes(); setIsAddModalOpen(false); }}
+                            onClose={() => { setIsAddModalOpen(false); }}
+                            onSave={() => {
+                                setIsAddModalOpen(false);
+                                carregarHospedes();
+                            }}
                         />
+
                     </div>
 
                     {hospedes.length === 0 ? (
@@ -153,7 +202,11 @@ export default function HospedesPage() {
                                                 {hospedeEditSelecionado && (
                                                     <EditHospedeModal
                                                         isOpen={isEditingModalOpen}
-                                                        onClose={() => { carregarHospedes(); setIsEditingModalOpen(false) }}
+                                                        onClose={() => { setIsEditingModalOpen(false) }}
+                                                        onSave={() => {
+                                                            setIsEditingModalOpen(false);
+                                                            carregarHospedes();
+                                                        }}
                                                         hospede={hospedeEditSelecionado}
                                                     />
                                                 )}

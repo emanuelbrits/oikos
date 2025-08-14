@@ -5,9 +5,10 @@ import { useAuth } from "../contexts/AuthContext";
 interface AddHospedeModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSave: () => void;
 }
 
-export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProps) {
+export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeModalProps) {
     const { token } = useAuth();
     const [nome, setNome] = useState("");
     const [cpf, setCpf] = useState("");
@@ -67,7 +68,7 @@ export default function AddHospedeModal({ isOpen, onClose }: AddHospedeModalProp
                 return;
             }
 
-            onClose();
+            onSave();
         } catch (error) {
             console.error("Erro ao salvar hóspede:", error);
             setErrorMsg("Ocorreu um erro inesperado. Tente novamente.");

@@ -31,7 +31,22 @@ export async function getHospedes(token: string): Promise<Hospede[]> {
 }
 
 export async function getHospedesByName(token: string, nome: string): Promise<Hospede[]> {
-  const res = await fetch(`${API_URL}/hospedes/buscar?nome=${nome}`, {
+  const res = await fetch(`${API_URL}/hospedes/buscar/nome?nome=${nome}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Erro ao buscar hóspede");
+  }
+
+  return res.json();
+}
+
+export async function getHospedesByCPF(token: string, cpf: string): Promise<Hospede[]> {
+  const res = await fetch(`${API_URL}/hospedes/buscar/cpf?cpf=${cpf}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
