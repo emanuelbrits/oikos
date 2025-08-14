@@ -36,7 +36,7 @@ export class HospedeService {
   async listar() {
     return this.prisma.hospede.findMany({
       orderBy: {
-        criadoEm: 'desc'
+        nome: 'asc'
       }
     });
   }
@@ -54,6 +54,20 @@ export class HospedeService {
       where: {
         nome: {
           contains: nome.toLowerCase(),
+        },
+      },
+    });
+  }
+
+  async buscarPorCPF(cpf: string) {
+    if (!cpf) {
+      return this.prisma.hospede.findMany();
+    }
+
+    return this.prisma.hospede.findMany({
+      where: {
+        cpf: {
+          equals: cpf,
         },
       },
     });

@@ -27,10 +27,17 @@ export class HospedeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('buscar')
+  @Get('buscar/nome')
   @ApiOperation({ summary: 'Buscar por nome' })
   async buscarPorNome(@Query('nome') nome: string) {
     return this.service.buscarPorNome(nome);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('buscar/cpf')
+  @ApiOperation({ summary: 'Buscar por CPF' })
+  async buscarPorCPF(@Query('cpf') cpf: string) {
+    return this.service.buscarPorCPF(cpf);
   }
 
   @UseGuards(JwtAuthGuard)
