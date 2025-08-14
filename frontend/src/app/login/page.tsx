@@ -7,6 +7,7 @@ import { CiMail } from "react-icons/ci";
 import { IoLockClosedOutline } from "react-icons/io5";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from 'next/image'
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -40,7 +41,13 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full bg-gray-100">
       <div className="hidden md:flex flex-col items-center justify-center gap-12 text-center w-2/5 text-[var(--sunshine)] bg-[var(--navy)] min-h-screen">
-        <TbHotelService className="w-64 h-64 rounded-full border-2 border-[var(--sunshine)] shadow-2xl p-12 bg-[var(--seaBlue)]" />
+        <Image
+          src="/oikos-logo.png"
+          width={256}
+          height={256}
+          alt="Logo"
+          className="w-64 h-64 rounded-full border-2 border-[var(--sunshine)] shadow-2xl p-2 bg-white"
+        />
         <h2 className="text-5xl">Gerenciador de Hospedagens</h2>
       </div>
 
@@ -49,8 +56,14 @@ export default function LoginPage() {
         className="flex flex-col items-center justify-center bg-[var(--sunshine)] p-6 shadow-lg min-h-screen w-full md:w-3/5"
       >
         <div className="flex flex-col gap-8 w-full max-w-md">
-          <h1 className="text-5xl font-bold mb-4 text-center text-[var(--navy)]">Oikos Pousada</h1>
-          
+          <Image
+            src="/oikos-pousada.png"
+            width={456}
+            height={265}
+            alt="Logo"
+            className="border-2 border-[var(--sunshine)]"
+          />
+
           <div className="flex flex-col gap-3">
             <label htmlFor="username" className="text-3xl font-bold text-[var(--navy)]">E-mail</label>
             <div className="flex">
