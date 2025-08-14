@@ -9,9 +9,11 @@ export interface Hospede {
     email: string;
     telefone?: string;
     profissao: string;
+    cep?: string;
     rua: string;
     bairro: string;
     cidade: string;
+    numero: string;
     estado: string;
     complemento: string;
     criadoEm?: string;
@@ -31,10 +33,12 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
     const [email, setEmail] = useState("");
     const [telefone, setTelefone] = useState("");
     const [profissao, setProfissao] = useState("");
+    const [cep, setCep] = useState("");
     const [bairro, setBairro] = useState("");
     const [rua, setRua] = useState("");
     const [complemento, setComplemento] = useState("");
     const [cidade, setCidade] = useState("");
+    const [numero, setNumero] = useState("");
     const [estado, setEstado] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -45,10 +49,12 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
             setEmail(hospede.email);
             setTelefone(hospede.telefone || "");
             setProfissao(hospede.profissao);
+            setCep(hospede.cep || "");
             setBairro(hospede.bairro);
             setRua(hospede.rua);
             setComplemento(hospede.complemento || "");
             setCidade(hospede.cidade);
+            setNumero(hospede.numero);
             setEstado(hospede.estado);
             document.body.style.overflow = "hidden";
         } else {
@@ -80,9 +86,11 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
                 email,
                 telefone: telefone.replace(/\D/g, ""),
                 profissao,
+                cep,
                 rua,
                 bairro,
                 cidade,
+                numero,
                 estado,
                 complemento,
             });
@@ -99,15 +107,37 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
                 email,
                 telefone: telefone.replace(/\D/g, ""),
                 profissao,
+                cep,
                 rua,
                 bairro,
                 cidade,
+                numero,
                 estado,
                 complemento,
             });
         } catch (error) {
             console.error("Erro ao atualizar hóspede:", error);
             setErrorMsg("Ocorreu um erro inesperado. Tente novamente.");
+        }
+    };
+
+    const buscarCep = async () => {
+        if (cep.length !== 8) return;
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+
+            if (data.erro) {
+                alert("CEP não encontrado!");
+                return;
+            }
+
+            setRua(data.logradouro || "");
+            setBairro(data.bairro || "");
+            setCidade(data.localidade || "");
+            setEstado(data.uf || "");
+        } catch (error) {
+            console.error("Erro ao buscar CEP:", error);
         }
     };
 
@@ -157,8 +187,7 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
             <div className="bg-gray-100 border-t-8 border-[var(--navy)] p-6 rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <h2 className="text-lg font-bold text-gray-800 mb-4">Editar Hóspede</h2>
 
-                {/* Inputs - igual ao modal de adicionar */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1  gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Nome</label>
                         <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
@@ -175,7 +204,7 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1  gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">E-mail</label>
                         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
@@ -193,20 +222,35 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
                     </div>
                 </div>
 
-                {/* Demais campos */}
                 <div className="mb-4">
                     <label className="block mb-1 text-sm font-medium">Profissão</label>
                     <input type="text" value={profissao} onChange={(e) => setProfissao(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="mb-4">
+                    <label className="block mb-1 text-sm font-medium">CEP (Sem traço)</label>
+                    <input
+                        type="text"
+                        placeholder="ex.: 01001000"
+                        value={cep}
+                        onChange={(e) => setCep(e.target.value.replace(/\D/g, ""))}
+                        onBlur={buscarCep}
+                        className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 mb-4">
+                    <div>
+                        <label className="block mb-1 text-sm font-medium">Rua</label>
+                        <input type="text" value={rua} onChange={(e) => setRua(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
+                    </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">Bairro</label>
                         <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                     <div>
-                        <label className="block mb-1 text-sm font-medium">Rua</label>
-                        <input type="text" value={rua} onChange={(e) => setRua(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
+                        <label className="block mb-1 text-sm font-medium">Número</label>
+                        <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                     </div>
                 </div>
 
@@ -215,7 +259,7 @@ export default function EditHospedeModal({ isOpen, onClose, onSave, hospede }: E
                     <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Cidade</label>
                         <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)} className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />

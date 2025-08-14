@@ -15,8 +15,10 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
     const [email, setEmail] = useState("");
     const [telefone, setTelefone] = useState("");
     const [profissao, setProfissao] = useState("");
-    const [bairro, setBairro] = useState("");
+    const [cep, setCep] = useState("");
     const [rua, setRua] = useState("");
+    const [bairro, setBairro] = useState("");
+    const [numero, setNumero] = useState("");
     const [complemento, setComplemento] = useState("");
     const [cidade, setCidade] = useState("");
     const [estado, setEstado] = useState("");
@@ -56,9 +58,11 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
                 email,
                 telefone: telefone.replace(/\D/g, ""),
                 profissao,
+                cep,
                 rua,
                 bairro,
                 cidade,
+                numero,
                 estado,
                 complemento,
             });
@@ -72,6 +76,26 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
         } catch (error) {
             console.error("Erro ao salvar hóspede:", error);
             setErrorMsg("Ocorreu um erro inesperado. Tente novamente.");
+        }
+    };
+
+    const buscarCep = async () => {
+        if (cep.length !== 8) return;
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await res.json();
+
+            if (data.erro) {
+                alert("CEP não encontrado!");
+                return;
+            }
+
+            setRua(data.logradouro || "");
+            setBairro(data.bairro || "");
+            setCidade(data.localidade || "");
+            setEstado(data.uf || "");
+        } catch (error) {
+            console.error("Erro ao buscar CEP:", error);
         }
     };
 
@@ -121,7 +145,7 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
             <div className="bg-gray-100 border-t-8 border-[var(--navy)] p-6 rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <h2 className="text-lg font-bold text-gray-800 mb-4">Adicionar Hóspede</h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Nome</label>
                         <input
@@ -145,7 +169,7 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">E-mail</label>
                         <input
@@ -181,7 +205,30 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
                     />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="mb-4">
+                    <label className="block mb-1 text-sm font-medium">CEP (Sem traço)</label>
+                    <input
+                        type="text"
+                        placeholder="ex.: 01001000"
+                        value={cep}
+                        onChange={(e) => setCep(e.target.value.replace(/\D/g, ""))}
+                        onBlur={buscarCep}
+                        className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 mb-4">
+                    <div>
+                        <label className="block mb-1 text-sm font-medium">Rua</label>
+                        <input
+                            type="text"
+                            placeholder="ex.: Rua das Flores"
+                            value={rua}
+                            onChange={(e) => setRua(e.target.value)}
+                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
+                        />
+                    </div>
+
                     <div>
                         <label className="block mb-1 text-sm font-medium">Bairro</label>
                         <input
@@ -194,12 +241,12 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
                     </div>
 
                     <div>
-                        <label className="block mb-1 text-sm font-medium">Rua</label>
+                        <label className="block mb-1 text-sm font-medium">Número</label>
                         <input
                             type="text"
-                            placeholder="ex.: Rua das Flores"
-                            value={rua}
-                            onChange={(e) => setRua(e.target.value)}
+                            placeholder="ex.: 123"
+                            value={numero}
+                            onChange={(e) => setNumero(e.target.value)}
                             className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20"
                         />
                     </div>
@@ -218,7 +265,7 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4">
                     <div>
                         <label className="block mb-1 text-sm font-medium">Cidade</label>
                         <input

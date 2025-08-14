@@ -13,10 +13,12 @@ export interface Hospede {
     cpf: string;
     email: string;
     telefone?: string;
+    cep?: string;
     profissao: string;
     rua: string;
     bairro: string;
     cidade: string;
+    numero: string;
     estado: string;
     complemento: string;
     criadoEm?: string;
@@ -74,6 +76,15 @@ export default function HospedeModal({ isOpen, onClose, hospede }: HospedeModalP
         } else {
             return v;
         }
+    };
+
+    const formatCEP = (value: string) => {
+        let v = value.replace(/\D/g, "");
+        if (v.length > 8) v = v.slice(0, 8);
+        if (v.length === 8) {
+            return `${v.slice(0, 5)}-${v.slice(5)}`;
+        }
+        return v;
     };
 
     if (!hospedeSelecionado) return null;
@@ -156,7 +167,7 @@ export default function HospedeModal({ isOpen, onClose, hospede }: HospedeModalP
                             <FaMapLocationDot className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                             <div className="flex flex-col">
                                 <h2>Endereço</h2>
-                                <p className="text-gray-600">{hospedeSelecionado.bairro}, {hospedeSelecionado.rua}, {hospedeSelecionado.complemento} - {hospedeSelecionado.cidade}/{hospedeSelecionado.estado}</p>
+                                <p className="text-gray-600">{hospedeSelecionado.rua}, {hospedeSelecionado.numero} {hospedeSelecionado.complemento ? `- ${hospedeSelecionado.complemento}` : ""} - {hospedeSelecionado.bairro}, {hospedeSelecionado.cidade}-{hospedeSelecionado.estado} {hospedeSelecionado.cep ? `- ${formatCEP(hospedeSelecionado.cep)}` : ""}</p>
                             </div>
                         </div>
                     </div>

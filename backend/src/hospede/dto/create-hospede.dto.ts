@@ -32,6 +32,11 @@ export class CreateHospedeDto {
   @IsOptional()
   profissao?: string;
 
+  @ApiProperty({ example: '92749374' })
+  @IsOptional()
+  @Matches(/^\d{8}$/, { message: 'CEP deve conter exatamente 8 dígitos numéricos' })
+  cep?: string;
+
   @ApiProperty({ example: 'Rua das Flores' })
   @IsString()
   @IsNotEmpty()
@@ -46,6 +51,11 @@ export class CreateHospedeDto {
   @IsString()
   @IsNotEmpty()
   cidade: string;
+
+  @ApiProperty({ example: '2534' })
+  @IsString()
+  @IsNotEmpty()
+  numero: string;
 
   @ApiProperty({ example: 'Estado Y' })
   @IsString()

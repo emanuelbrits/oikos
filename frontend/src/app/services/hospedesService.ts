@@ -7,9 +7,11 @@ export interface Hospede {
   email: string;
   telefone?: string;
   profissao: string;
+  cep?: string;
   rua: string;
   bairro: string;
   cidade: string;
+  numero: string;
   estado: string;
   complemento: string;
   criadoEm?: string;

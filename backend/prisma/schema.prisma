@@ -19,9 +19,11 @@ model Hospede {
   email       String?      @unique
   telefone    String?
   profissao   String?
+  cep         String?
   rua         String
-  bairro      String
   cidade      String
+  numero      String       @default("")
+  bairro      String
   estado      String
   complemento String?
   criadoEm    DateTime     @default(dbgenerated("(datetime('now','-3 hours'))"))

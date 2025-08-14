@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { deleteHospede, getHospedes, getHospedesByCPF, getHospedesByName, Hospede } from "../services/hospedesService";
+import { useEffect, useState } from "react";
+import { getHospedes, getHospedesByCPF, getHospedesByName, Hospede } from "../services/hospedesService";
 import { useAuth } from "../contexts/AuthContext";
 import { MdAdd } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -21,7 +21,6 @@ export default function HospedesPage() {
     const [maxButtons, setMaxButtons] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const { token } = useAuth();
-    const nomeRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const updateMaxButtons = () => {
@@ -57,10 +56,6 @@ export default function HospedesPage() {
     for (let i = startPage; i <= endPage; i++) {
         pageNumbers.push(i);
     }
-
-    useEffect(() => {
-        nomeRef.current?.focus();
-    }, []);
 
     useEffect(() => {
         carregarHospedes()
@@ -129,7 +124,7 @@ export default function HospedesPage() {
                                 <label htmlFor="nome">Buscar pelo nome</label>
                                 <div className="flex gap-2">
                                     <input
-                                        ref={nomeRef}
+                                        autoFocus
                                         type="text"
                                         placeholder="Buscar..."
                                         name="nome"
