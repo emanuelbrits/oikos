@@ -3,14 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { deleteHospede, getHospedes, getHospedesByCPF, getHospedesByName, Hospede } from "../services/hospedesService";
 import { useAuth } from "../contexts/AuthContext";
-import { MdAdd, MdContactPage, MdDelete, MdEdit } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
-import { FaInfo } from "react-icons/fa";
-import { FaMapLocationDot } from "react-icons/fa6";
-import ConfirmModal from "../components/ConfirmModal";
 import AddHospedeModal from "../components/AddHospedeModal";
-import EditHospedeModal from "../components/EditHospedeModal";
 import LoadingScreen from "../components/loadingScreen";
 import HospedeModal from "../components/hospedeModal";
 
@@ -18,16 +14,49 @@ export default function HospedesPage() {
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
     const [isHospedeModalOpen, setIsHospedeModalOpen] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
     const [hospedeSelecionado, setHospedeSelecionado] = useState<Hospede | null>(null);
-    const [hospedeEditSelecionado, setHospedeEditSelecionado] = useState<Hospede | null>(null);
-    const [hospedeRemoveSelecionado, setHospedeRemoveSelecionado] = useState<number | null>(null);
     const [buscaNome, setBuscaNome] = useState("");
     const [buscaCPF, setBuscaCPF] = useState("");
-    const nomeRef = useRef<HTMLInputElement>(null);
+    const [maxButtons, setMaxButtons] = useState(5);
+    const [currentPage, setCurrentPage] = useState(1);
     const { token } = useAuth();
+    const nomeRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const updateMaxButtons = () => {
+            const width = window.innerWidth;
+            if (width < 424) setMaxButtons(3);
+            else if (width < 768) setMaxButtons(4);
+            else if (width < 1024) setMaxButtons(8);
+            else setMaxButtons(12);
+        };
+
+        updateMaxButtons();
+        window.addEventListener("resize", updateMaxButtons);
+
+        return () => window.removeEventListener("resize", updateMaxButtons);
+    }, []);
+
+    const ITEMS_PER_PAGE = 20;
+
+    const indexOfLast = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
+    const currentHospedes = hospedes.slice(indexOfFirst, indexOfLast);
+
+    const totalPages = Math.ceil(hospedes.length / ITEMS_PER_PAGE);
+
+    const half = Math.floor(maxButtons / 2);
+    let startPage = Math.max(1, currentPage - half);
+    let endPage = Math.min(totalPages, currentPage + half);
+
+    if (currentPage <= half) endPage = Math.min(totalPages, maxButtons);
+    if (currentPage + half > totalPages) startPage = Math.max(1, totalPages - maxButtons + 1);
+
+    const pageNumbers = [];
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+    }
 
     useEffect(() => {
         nomeRef.current?.focus();
@@ -41,8 +70,8 @@ export default function HospedesPage() {
         setBuscaCPF("");
         carregarHospedes();
         if (!buscaNome.trim() || !token) return;
-        console.log("Buscando por nome:", buscaNome);
         getHospedesByName(token, buscaNome).then(setHospedes);
+        setCurrentPage(1);
     };
 
     const buscarPorCPF = () => {
@@ -50,6 +79,7 @@ export default function HospedesPage() {
         carregarHospedes();
         if (!buscaCPF.trim() || !token) return;
         getHospedesByCPF(token, buscaCPF.replace(/\D/g, "")).then(setHospedes);
+        setCurrentPage(1);
     };
 
     const carregarHospedes = async () => {
@@ -65,11 +95,6 @@ export default function HospedesPage() {
             }
     };
 
-    const removerHospede = (id: number) => {
-        deleteHospede(token!, id)
-        carregarHospedes();
-    };
-
     const formatCPF = (value: string) => {
         let v = value.replace(/\D/g, "");
         if (v.length > 11) v = v.slice(0, 11);
@@ -82,20 +107,6 @@ export default function HospedesPage() {
         } else {
             return v;
         }
-    };
-
-    const formatTelefone = (value: string) => {
-        let v = value.replace(/\D/g, "");
-        if (v.length > 11) v = v.slice(0, 11);
-
-        if (v.length > 6) {
-            return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-        } else if (v.length > 2) {
-            return `(${v.slice(0, 2)}) ${v.slice(2)}`;
-        } else if (v.length > 0) {
-            return `(${v}`;
-        }
-        return "";
     };
 
     if (loading) {
@@ -179,112 +190,84 @@ export default function HospedesPage() {
                     {hospedes.length === 0 ? (
                         <p className="text-gray-500">Nenhum hóspede encontrado.</p>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {hospedes.map((hospede) => (
-                                <div
-                                    key={hospede.id}
-                                    className="bg-gray-100 shadow-lg rounded-xl p-6 pt-4 flex flex-col justify-between border-t-4 border-[var(--navy)]"
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full border border-gray-200 rounded-lg">
+                                <thead className="bg-[var(--navy)] text-[var(--sunshine)]">
+                                    <tr>
+                                        <th className="text-center px-4 py-2">Nome</th>
+                                        <th className="text-center px-4 py-2">CPF</th>
+                                        <th className="text-center px-4 py-2">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {currentHospedes.map((hospede) => (
+                                        <tr key={hospede.id}>
+                                            <td className="px-4 text-center py-2">{hospede.nome}</td>
+                                            <td className="px-4 text-center py-2">{formatCPF(hospede.cpf)}</td>
+                                            <td className="px-4 text-center py-2">
+                                                <button
+                                                    onClick={() => {
+                                                        if (typeof hospede.id === "number") setHospedeSelecionado(hospede);
+                                                        else setHospedeSelecionado(null);
+                                                        setIsHospedeModalOpen(true);
+                                                    }}
+                                                    className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
+                                                >
+                                                    Ver detalhes
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {hospedeSelecionado && (
+                                <HospedeModal
+                                    isOpen={isHospedeModalOpen}
+                                    onClose={(edited, deleted, hospede) => {
+                                        setIsHospedeModalOpen(false);
+                                        if (edited)
+                                            setHospedes([
+                                                ...hospedes.filter((h) => h.id !== hospede.id),
+                                                hospede,
+                                            ]);
+                                        if (deleted)
+                                            setHospedes(hospedes.filter((h) => h.id !== hospede.id));
+                                    }}
+                                    hospede={hospedeSelecionado}
+                                />
+                            )}
+
+                            <div className="flex flex-wrap justify-center items-center gap-2 mt-4">
+                                <button
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 cursor-pointer"
                                 >
-                                    <div>
-                                        <div className="flex justify-between items-center p-2 bg-[var(--sunshine)]/20 rounded-2xl border-1 border-[var(--navy)]/20">
-                                            <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">{hospede.nome}</h2>
-                                            <div className="flex justify-between items-center gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        if (typeof hospede.id === "number") {
-                                                            setHospedeEditSelecionado(hospede);
-                                                        } else {
-                                                            setHospedeEditSelecionado(null);
-                                                        }
-                                                        setIsEditingModalOpen(true);
-                                                    }}
-                                                    className="w-full bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
-                                                >
-                                                    <MdEdit />
-                                                </button>
-                                                {hospedeEditSelecionado && (
-                                                    <EditHospedeModal
-                                                        isOpen={isEditingModalOpen}
-                                                        onClose={() => { setIsEditingModalOpen(false) }}
-                                                        onSave={() => {
-                                                            setIsEditingModalOpen(false);
-                                                            carregarHospedes();
-                                                        }}
-                                                        hospede={hospedeEditSelecionado}
-                                                    />
-                                                )}
-                                                <button
-                                                    onClick={() => {
-                                                        if (typeof hospede.id === "number") {
-                                                            setHospedeRemoveSelecionado(hospede.id);
-                                                        } else {
-                                                            setHospedeRemoveSelecionado(null);
-                                                        }
-                                                        setModalOpen(true);
-                                                    }}
-                                                    className="w-full bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
-                                                >
-                                                    <MdDelete />
-                                                </button>
-                                                <ConfirmModal
-                                                    isOpen={modalOpen}
-                                                    onClose={() => setModalOpen(false)}
-                                                    onConfirm={() => hospedeRemoveSelecionado && removerHospede(hospedeRemoveSelecionado)}
-                                                    title="Excluir hóspede"
-                                                    message="Tem certeza que deseja remover este hóspede? Essa ação não poderá ser desfeita."
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col space-y-3 mt-2">
-                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
-                                                <MdContactPage className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
-                                                <div className="flex flex-col">
-                                                    <h2>Contato</h2>
-                                                    <p className="text-gray-600">{hospede.email}</p>
-                                                    <p className="text-gray-600">{formatTelefone(hospede.telefone || "")}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
-                                                <FaInfo className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
-                                                <div className="flex flex-col">
-                                                    <h2>Informações</h2>
-                                                    <p className="text-gray-600">CPF: {formatCPF(hospede.cpf)}</p>
-                                                    <p className="text-gray-600"> Profissão: {hospede.profissao}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
-                                                <FaMapLocationDot className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
-                                                <div className="flex flex-col">
-                                                    <h2>Endereço</h2>
-                                                    <p className="text-gray-600">{hospede.bairro}, {hospede.rua}, {hospede.complemento} - {hospede.cidade}/{hospede.estado}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex mt-2 justify-center">
-                                            <button
-                                                onClick={() => {
-                                                    if (typeof hospede.id === "number") {
-                                                        setHospedeSelecionado(hospede);
-                                                    } else {
-                                                        setHospedeSelecionado(null);
-                                                    }
-                                                    setIsHospedeModalOpen(true);
-                                                }}
-                                                className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer w-full md:w-auto h-[3.125rem] flex items-center justify-center">Ver detalhes
-                                            </button>
-                                            {hospedeSelecionado && (<HospedeModal
-                                                isOpen={isHospedeModalOpen}
-                                                onClose={(edited, deleted, hospede) => {
-                                                    setIsHospedeModalOpen(false);
-                                                    if (edited) setHospedes([...hospedes.filter(h => h.id !== hospede.id), hospede]);
-                                                    if (deleted) setHospedes(hospedes.filter(h => h.id !== hospede.id));
-                                                }}
-                                                hospede={hospedeSelecionado}
-                                            />)}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                    Anterior
+                                </button>
+
+                                {pageNumbers.map(num => (
+                                    <button
+                                        key={num}
+                                        onClick={() => setCurrentPage(num)}
+                                        className={`px-3 py-1 rounded-lg cursor-pointer ${currentPage === num
+                                            ? "bg-[var(--navy)] text-[var(--sunshine)]"
+                                            : "bg-gray-200 hover:bg-gray-300"
+                                            }`}
+                                    >
+                                        {num}
+                                    </button>
+                                ))}
+
+                                <button
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 cursor-pointer"
+                                >
+                                    Próxima
+                                </button>
+                            </div>
                         </div>
                     )}
                 </main>
