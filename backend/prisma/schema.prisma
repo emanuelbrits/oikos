@@ -41,20 +41,21 @@ model Quarto {
 }
 
 model Hospedagem {
-  id              Int              @id @default(autoincrement())
-  hospedeId       Int
-  hospede         Hospede          @relation(fields: [hospedeId], references: [id], onDelete: Cascade)
-  quartoId        Int
-  quarto          Quarto           @relation(fields: [quartoId], references: [id], onDelete: Cascade)
-  dataHoraEntrada DateTime
-  dataHoraSaida   DateTime
-  valorDiaria     Float
-  formaPagamento  String
-  descontos       Float            @default(0)
-  acrescimos      Float            @default(0)
-  observacoes     String?
-  criadoEm        DateTime         @default(dbgenerated("(datetime('now','-3 hours'))"))
-  Consumo_diario  Consumo_diario[]
+  id                    Int              @id @default(autoincrement())
+  hospedeId             Int
+  hospede               Hospede          @relation(fields: [hospedeId], references: [id], onDelete: Cascade)
+  quartoId              Int
+  quarto                Quarto           @relation(fields: [quartoId], references: [id], onDelete: Cascade)
+  dataHoraEntrada       DateTime
+  dataHoraSaidaPrevista DateTime
+  dataHoraSaida         DateTime?        
+  valorDiaria           Float
+  formaPagamento        String
+  descontos             Float            @default(0)
+  acrescimos            Float            @default(0)
+  observacoes           String?
+  criadoEm              DateTime         @default(dbgenerated("(datetime('now','-3 hours'))"))
+  Consumo_diario        Consumo_diario[]
 }
 
 model Produto {

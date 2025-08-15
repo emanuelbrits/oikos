@@ -13,11 +13,13 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       setErrorMsg("");
@@ -35,6 +37,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error(err);
       setErrorMsg("Usuário ou senha incorretos");
+      setLoading(false);
     }
   };
 
@@ -42,6 +45,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full bg-gray-100">
       <div className="hidden md:flex flex-col items-center justify-center gap-12 text-center w-2/5 text-[var(--sunshine)] bg-[var(--navy)] min-h-screen">
         <Image
+          priority
           src="/oikos-logo.png"
           width={256}
           height={256}
@@ -57,6 +61,7 @@ export default function LoginPage() {
       >
         <div className="flex flex-col gap-8 w-full max-w-md">
           <Image
+            priority
             src="/oikos-pousada.png"
             width={456}
             height={265}
@@ -136,9 +141,18 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-[var(--seaBlue)] text-[var(--sunshine)] text-3xl font-bold py-4 rounded shadow-xl hover:bg-[var(--navy)] cursor-pointer transition-colors duration-300"
+            className="w-full h-[4.25rem] bg-[var(--seaBlue)] text-[var(--sunshine)] text-3xl font-bold py-4 rounded shadow-xl hover:bg-[var(--navy)] cursor-pointer transition-colors duration-300"
           >
-            ENTRAR
+            {loading ? (
+              <div className='flex space-x-2 justify-center items-center dark:invert'>
+                <span className='sr-only'>Loading...</span>
+                <div className='h-5 w-5 bg-[var(--sunshine)] rounded-full animate-bounce [animation-delay:-0.3s]'></div>
+                <div className='h-5 w-5 bg-[var(--sunshine)] rounded-full animate-bounce [animation-delay:-0.15s]'></div>
+                <div className='h-5 w-5 bg-[var(--sunshine)] rounded-full animate-bounce'></div>
+              </div>
+            ) : (
+              'ENTRAR'
+            )}
           </button>
         </div>
       </form>

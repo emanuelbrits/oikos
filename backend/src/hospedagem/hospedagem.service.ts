@@ -2,30 +2,57 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateHospedagemDto } from './dto/create-hospedagem.dto';
 import { UpdateHospedagemDto } from './dto/update-hospedagem.dto';
-import { connect } from 'http2';
-
 @Injectable()
 export class HospedagemService {
   constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateHospedagemDto) {
-    return this.prisma.hospedagem.create({
-      data: {
-        dataHoraEntrada: new Date(dto.dataHoraEntrada),
-        dataHoraSaida: new Date(dto.dataHoraSaida),
-        valorDiaria: dto.valorDiaria,
-        formaPagamento: dto.formaPagamento,
-        descontos: dto.descontos,
-        acrescimos: dto.acrescimos,
-        observacoes: dto.observacoes,
-        hospede: {
-          connect: { id: dto.idHospede }
-        },
-        quarto: {
-          connect: { id: dto.quartoId }
-        }
+    const data = {
+      dataHoraEntrada: new Date(dto.dataHoraEntrada),
+      dataHoraSaidaPrevista: new Date(dto.dataHoraSaidaPrevista),
+      valorDiaria: dto.valorDiaria,
+      formaPagamento: dto.formaPagamento,
+      descontos: dto.descontos,
+      acrescimos: dto.acrescimos,
+      observacoes: dto.observacoes,
+      hospede: {
+        connect: { id: dto.idHospede }
+      },
+      quarto: {
+        connect: { id: dto.quartoId }
       }
-    });
+    }
+
+    try {
+      const hospedagem = await this.prisma.hospedagem.create({ data });
+
+      await this.prisma.quarto.update({
+        where: { id: dto.quartoId },
+        data: { status: "Ocupado" },
+      });
+
+      return {
+        success: true,
+        data: hospedagem,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar hospedagem:", error);
+
+      let message = "Erro ao salvar a hospedagem.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   findAll() {
@@ -67,32 +94,90 @@ export class HospedagemService {
   }
 
   async update(id: number, dto: UpdateHospedagemDto) {
-    await this.findOne(id);
-    const dataHoraEntradaDate = dto.dataHoraEntrada ? new Date(dto.dataHoraEntrada) : undefined;
-    const dataHoraSaidaDate = dto.dataHoraSaida ? new Date(dto.dataHoraSaida) : undefined;
-
-    return this.prisma.hospedagem.update({
+    const hospedagemExistente = await this.prisma.hospedagem.findUnique({
       where: { id },
-      data: {
-        dataHoraEntrada: dataHoraEntradaDate,
-        dataHoraSaida: dataHoraSaidaDate,
-        valorDiaria: dto.valorDiaria,
-        formaPagamento: dto.formaPagamento,
-        descontos: dto.descontos,
-        acrescimos: dto.acrescimos,
-        observacoes: dto.observacoes,
-        hospede: {
-          connect: { id: dto.idHospede }
-        },
-        quarto: {
-          connect: { id: dto.quartoId }
-        }
-      },
+      select: { quartoId: true },
     });
+
+    if (!hospedagemExistente) throw new Error("Hospedagem não encontrada");
+
+    const dataHoraEntradaDate = dto.dataHoraEntrada ? new Date(dto.dataHoraEntrada) : undefined;
+    const dataHoraSaidaPrevistaDate = dto.dataHoraSaidaPrevista ? new Date(dto.dataHoraSaidaPrevista) : undefined;
+    const dataHoraSaida = dto.dataHoraSaida ? new Date(dto.dataHoraSaida) : null;
+
+    const data = {
+      dataHoraEntrada: dataHoraEntradaDate,
+      dataHoraSaidaPrevista: dataHoraSaidaPrevistaDate,
+      dataHoraSaida: dataHoraSaida,
+      valorDiaria: dto.valorDiaria,
+      formaPagamento: dto.formaPagamento,
+      descontos: dto.descontos,
+      acrescimos: dto.acrescimos,
+      observacoes: dto.observacoes,
+      hospede: {
+        connect: { id: dto.idHospede },
+      },
+      quarto: {
+        connect: { id: dto.quartoId },
+      },
+    };
+
+    try {
+      const hospedagem = await this.prisma.hospedagem.update({
+        where: { id },
+        data,
+      });
+
+      if (hospedagemExistente.quartoId !== dto.quartoId) {
+        await this.prisma.quarto.update({
+          where: { id: hospedagemExistente.quartoId },
+          data: { status: "Disponível" },
+        });
+
+        await this.prisma.quarto.update({
+          where: { id: dto.quartoId },
+          data: { status: "Ocupado" },
+        });
+      }
+
+      return {
+        success: true,
+        data: hospedagem,
+      };
+    } catch (error: any) {
+      console.error("Erro ao atualizar hospedagem:", error);
+
+      let message = "Erro ao salvar a hospedagem.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    const hospedagem = await this.prisma.hospedagem.findUnique({
+      where: { id },
+      select: { quartoId: true },
+    });
+
+    if (!hospedagem) throw new Error("Hospedagem não encontrada");
+
+    await this.prisma.quarto.update({
+      where: { id: hospedagem.quartoId },
+      data: { status: "Disponível" },
+    });
+
     return this.prisma.hospedagem.delete({ where: { id } });
   }
+
 }

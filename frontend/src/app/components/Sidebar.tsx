@@ -34,7 +34,7 @@ export default function Sidebar({ title = "Menu" }: SidebarProps) {
 
   const items: SidebarItem[] = [
     { label: "Início", icon: FiHome, href: "/" },
-    { label: "Hospedagens", icon: TbHotelService, href: "/hospedagem" },
+    { label: "Hospedagens", icon: TbHotelService, href: "/hospedagens" },
     { label: "Hóspedes", icon: IoIosPerson, href: "/hospedes" },
     { label: "Reservas", icon: LuClock4, href: "/reservas" },
     { label: "Quartos", icon: MdBedroomParent, href: "/quartos" },

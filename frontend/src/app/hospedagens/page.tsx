@@ -1,23 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHospedes, getHospedesByCPF, getHospedesByName, Hospede } from "../services/hospedesService";
 import { useAuth } from "../contexts/AuthContext";
 import { MdAdd } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
-import AddHospedeModal from "../components/AddHospedeModal";
 import LoadingScreen from "../components/loadingScreen";
-import HospedeModal from "../components/hospedeModal";
+import { getHospedagens, Hospedagem } from "../services/hospedagensService";
+import AddHospedagemModal from "../components/AddHospedagemModal";
+import HospedagemModal from "../components/hospedagemModal";
 
-export default function HospedesPage() {
-    const [hospedes, setHospedes] = useState<Hospede[]>([]);
+export default function HospedagensPage() {
+    const [hospedagens, setHospedagens] = useState<Hospedagem[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isHospedeModalOpen, setIsHospedeModalOpen] = useState(false);
-    const [hospedeSelecionado, setHospedeSelecionado] = useState<Hospede | null>(null);
-    const [buscaNome, setBuscaNome] = useState("");
-    const [buscaCPF, setBuscaCPF] = useState("");
+    const [hospedagemSelecionada, setHospedagemSelecionada] = useState<Hospedagem | null>(null);
     const [maxButtons, setMaxButtons] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const { token } = useAuth();
@@ -41,9 +39,9 @@ export default function HospedesPage() {
 
     const indexOfLast = currentPage * ITEMS_PER_PAGE;
     const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
-    const currentHospedes = hospedes.slice(indexOfFirst, indexOfLast);
+    const currentHospedagens = hospedagens.slice(indexOfFirst, indexOfLast);
 
-    const totalPages = Math.ceil(hospedes.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(hospedagens.length / ITEMS_PER_PAGE);
 
     const half = Math.floor(maxButtons / 2);
     let startPage = Math.max(1, currentPage - half);
@@ -58,50 +56,20 @@ export default function HospedesPage() {
     }
 
     useEffect(() => {
-        carregarHospedes()
+        carregarHospedagens()
     }, [token]);
 
-    const buscarPorNome = () => {
-        setBuscaCPF("");
-        carregarHospedes();
-        if (!buscaNome.trim() || !token) return;
-        getHospedesByName(token, buscaNome).then(setHospedes);
-        setCurrentPage(1);
-    };
-
-    const buscarPorCPF = () => {
-        setBuscaNome("");
-        carregarHospedes();
-        if (!buscaCPF.trim() || !token) return;
-        getHospedesByCPF(token, buscaCPF.replace(/\D/g, "")).then(setHospedes);
-        setCurrentPage(1);
-    };
-
-    const carregarHospedes = async () => {
+    const carregarHospedagens = async () => {
         if (token)
             try {
                 setLoading(true);
-                const data = await getHospedes(token);
-                setHospedes(data);
+                const data = await getHospedagens(token);
+                setHospedagens(data);
             } catch (error) {
-                console.error("Erro ao buscar hóspedes:", error);
+                console.error("Erro ao buscar hospedagens:", error);
             } finally {
                 setLoading(false);
             }
-    };
-
-    const formatCPF = (value: string) => {
-        let v = value.replace(/\D/g, "");
-        if (v.length > 11) v = v.slice(0, 11);
-        if (v.length > 9) {
-            return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
-        } else if (v.length > 6) {
-            return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
-        } else if (v.length > 3) {
-            return `${v.slice(0, 3)}.${v.slice(3)}`;
-        } else {
-            return v;
-        }
     };
 
     if (loading) {
@@ -116,94 +84,64 @@ export default function HospedesPage() {
                 <Sidebar title="Oikos" />
 
                 <main className="flex-1 ml-0 p-6">
-                    <h1 className="text-5xl text-[var(--navy)] font-semibold mb-6">Hóspedes</h1>
+                    <h1 className="text-5xl text-[var(--navy)] font-semibold mb-6">Hospedagens</h1>
 
                     <div>
                         <div className="flex flex-col md:flex-row gap-4 mb-6 text-[var(--navy)] text-2xl w-full">
-                            <div className="flex flex-col flex-1 gap-2">
-                                <label htmlFor="nome">Buscar pelo nome</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        autoFocus
-                                        type="text"
-                                        placeholder="Buscar..."
-                                        name="nome"
-                                        value={buscaNome}
-                                        onChange={(e) => setBuscaNome(e.target.value)}
-                                        className="bg-gray-100 border border-[var(--navy)]/50 rounded-lg py-2 px-4 w-full"
-                                    />
-                                    <button
-                                        onClick={buscarPorNome}
-                                        className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg hover:bg-[var(--seaBlue)] transition-colors cursor-pointer h-[3.125rem]"
-                                    >
-                                        Buscar
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col flex-1 gap-2">
-                                <label htmlFor="cpf">Buscar pelo CPF</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Buscar..."
-                                        value={buscaCPF}
-                                        name="cpf"
-                                        onChange={(e) => setBuscaCPF(formatCPF(e.target.value))}
-                                        className="bg-gray-100 border border-[var(--navy)]/50 rounded-lg py-2 px-4 w-full"
-                                    />
-                                    <button
-                                        onClick={buscarPorCPF}
-                                        className="bg-[var(--navy)] text-[var(--sunshine)] px-4 rounded-lg hover:bg-[var(--seaBlue)] transition-colors cursor-pointer h-[3.125rem]"
-                                    >
-                                        Buscar
-                                    </button>
-                                </div>
-                            </div>
 
                             <div className="flex flex-col justify-end w-full md:w-auto">
                                 <button
                                     onClick={() => setIsAddModalOpen(true)}
                                     className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--seaBlue)] transition-colors cursor-pointer w-full md:w-auto h-[3.125rem] flex items-center justify-center"
                                 >
-                                    <MdAdd size={24} /> Hóspede
+                                    <MdAdd size={24} /> Hospedagem
                                 </button>
                             </div>
 
                         </div>
-                        <AddHospedeModal
+                        <AddHospedagemModal
                             isOpen={isAddModalOpen}
                             onClose={() => { setIsAddModalOpen(false); }}
                             onSave={() => {
                                 setIsAddModalOpen(false);
-                                carregarHospedes();
+                                carregarHospedagens();
                             }}
                         />
 
                     </div>
 
-                    {hospedes.length === 0 ? (
-                        <p className="text-gray-500">Nenhum hóspede encontrado.</p>
+                    {hospedagens.length === 0 ? (
+                        <p className="text-gray-500">Nenhuma hospedagem encontrada.</p>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="min-w-full border border-gray-200 rounded-lg">
                                 <thead className="bg-[var(--navy)] text-[var(--sunshine)]">
                                     <tr>
-                                        <th className="text-center px-4 py-2">Nome</th>
-                                        <th className="text-center px-4 py-2">CPF</th>
+                                        <th className="text-center px-4 py-2">Quarto</th>
+                                        <th className="text-center px-4 py-2">Data Entrada</th>
+                                        <th className="text-center px-4 py-2">Data Saída prevista</th>
+                                        <th className="text-center px-4 py-2">Data Saída</th>
                                         <th className="text-center px-4 py-2">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {currentHospedes.map((hospede) => (
-                                        <tr key={hospede.id}>
-                                            <td className="px-4 text-center py-2">{hospede.nome}</td>
-                                            <td className="px-4 text-center py-2">{formatCPF(hospede.cpf)}</td>
+                                    {currentHospedagens.map((hospedagem) => (
+                                        <tr key={hospedagem.id}>
+                                            <td className="px-4 text-center py-2">{hospedagem.quarto.numero}</td>
+                                            <td className="px-4 text-center py-2">{new Date(hospedagem.dataHoraEntrada).toLocaleString("pt-BR")}</td>
+                                            <td className="px-4 text-center py-2">{new Date(hospedagem.dataHoraSaidaPrevista).toLocaleString("pt-BR")}</td>
+                                            <td className="px-4 text-center py-2">
+                                                {hospedagem.dataHoraSaida ? (
+                                                    new Date(hospedagem.dataHoraSaida).toLocaleString("pt-BR")
+                                                ) : (
+                                                    ""
+                                                )}
+                                            </td>
                                             <td className="px-4 text-center py-2">
                                                 <button
                                                     onClick={() => {
-                                                        if (typeof hospede.id === "number") setHospedeSelecionado(hospede);
-                                                        else setHospedeSelecionado(null);
+                                                        if (typeof hospedagem.id === "number") setHospedagemSelecionada(hospedagem);
+                                                        else setHospedagemSelecionada(null);
                                                         setIsHospedeModalOpen(true);
                                                     }}
                                                     className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--seaBlue)] transition-colors cursor-pointer"
@@ -216,20 +154,20 @@ export default function HospedesPage() {
                                 </tbody>
                             </table>
 
-                            {hospedeSelecionado && (
-                                <HospedeModal
+                            {hospedagemSelecionada && (
+                                <HospedagemModal
                                     isOpen={isHospedeModalOpen}
-                                    onClose={(edited, deleted, hospede) => {
+                                    onClose={(edited, deleted, hospedagem) => {
                                         setIsHospedeModalOpen(false);
                                         if (edited)
-                                            setHospedes([
-                                                ...hospedes.filter((h) => h.id !== hospede.id),
-                                                hospede,
+                                            setHospedagens([
+                                                ...hospedagens.filter((h) => h.id !== hospedagem.id),
+                                                hospedagem,
                                             ]);
                                         if (deleted)
-                                            setHospedes(hospedes.filter((h) => h.id !== hospede.id));
+                                            setHospedagens(hospedagens.filter((h) => h.id !== hospedagem.id));
                                     }}
-                                    hospede={hospedeSelecionado}
+                                    hospedagem={hospedagemSelecionada}
                                 />
                             )}
 

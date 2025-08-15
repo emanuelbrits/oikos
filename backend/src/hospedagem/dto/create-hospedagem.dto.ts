@@ -17,8 +17,13 @@ export class CreateHospedagemDto {
   @IsDateString()
   dataHoraEntrada: string;
 
+  @ApiProperty({ example: '2025-08-10T12:00:00Z', description: 'Data e hora de saída Prevista no formato ISO 8601' })
+  @IsDateString()
+  dataHoraSaidaPrevista: string;
+
   @ApiProperty({ example: '2025-08-10T12:00:00Z', description: 'Data e hora de saída no formato ISO 8601' })
   @IsDateString()
+  @IsOptional()
   dataHoraSaida: string;
 
   @ApiProperty({ example: 150.0, description: 'Valor da diária (positivo)' })

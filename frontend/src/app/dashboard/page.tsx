@@ -52,7 +52,7 @@ export default function DashboardPage() {
               )}
 
               <div className="flex justify-end">
-                <button className="mt-4 bg-[var(--navy)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                <button className="mt-4 bg-[var(--navy)] hover:bg-[var(--seaBlue)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
                   Ver todos
                 </button>
               </div>
@@ -78,7 +78,7 @@ export default function DashboardPage() {
                 )}
 
                 <div className="flex justify-end">
-                  <button className="mt-4 bg-[var(--navy)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                  <button className="mt-4 bg-[var(--navy)] hover:bg-[var(--seaBlue)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
                     Ver todos
                   </button>
                 </div>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
                 )}
 
                 <div className="flex justify-end">
-                  <button onClick={() => {}} className="mt-4 bg-[var(--navy)] hover:bg-[var(--umemurasaki)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
+                  <button onClick={() => {}} className="mt-4 bg-[var(--navy)] hover:bg-[var(--seaBlue)] text-[var(--sunshine)] font-bold rounded-md px-4 py-2 justify-end cursor-pointer">
                     Ver todos
                   </button>
                 </div>

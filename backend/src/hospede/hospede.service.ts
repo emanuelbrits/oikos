@@ -87,7 +87,7 @@ export class HospedeService {
         data: hospede,
       };
     } catch (error: any) {
-      console.error("Erro ao criar hóspede:", error);
+      console.error("Erro ao atualizar hóspede:", error);
 
       let message = "Erro ao salvar o hóspede.";
 
