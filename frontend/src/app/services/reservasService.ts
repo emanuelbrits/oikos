@@ -15,6 +15,7 @@ export interface Reserva {
     estado: string;
   };
   quarto: {
+    id: number;
     numero: number;
     tipo: string;
   };
@@ -33,4 +34,31 @@ export async function getReservas(token: string): Promise<Reserva[]> {
   }
 
   return res.json();
+}
+
+export async function createReserva(token: string, reservaData: any) {
+  try {
+    const response = await fetch(`${API_URL}/reserva`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(reservaData),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    return {
+      success: data?.success ?? false,
+      message: data?.message || "Erro desconhecido ao criar reserva",
+      data: data?.data || null,
+    };
+  } catch (error: any) {
+    console.error("Erro ao criar reserva:", error);
+    return {
+      success: false,
+      message: error?.message || "Erro de conexão com o servidor",
+    };
+  }
 }

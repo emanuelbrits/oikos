@@ -35,7 +35,7 @@ export default function HospedagemModal({ isOpen, onClose, hospedagem }: Hospeda
     if (!hospedagemSelecionada) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/10 z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/10 z-50 p-4 text-bold">
             <div
                 key={hospedagemSelecionada?.id}
                 className="bg-gray-100 shadow-lg rounded-xl p-6 pt-4 flex flex-col justify-between border-t-4 border-[var(--navy)]"
