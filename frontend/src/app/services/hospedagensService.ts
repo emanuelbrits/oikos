@@ -35,6 +35,21 @@ export async function getHospedagens(token: string): Promise<Hospedagem[]> {
   return res.json();
 }
 
+export async function getHospedagensByHospede(token: string, hospedeId: number): Promise<Hospedagem[]> {
+  const res = await fetch(`${API_URL}/hospedagem?hospedeId=${hospedeId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Erro ao buscar hospedagens pelo hóspede");
+  }
+
+  return res.json();
+}
+
 export async function deleteHospedagem(token: string, id: number): Promise<Hospedagem[]> {
   const res = await fetch(`${API_URL}/hospedagem/${id}`, {
     method: "DELETE",
