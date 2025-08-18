@@ -1,15 +1,15 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface Reserva {
-  id: string;
-  hospedeId: string;
+  id: number;
+  hospedeId: number;
   numeroQuarto: number;
   dataHoraInicial: string;
   dataHoraFinal: string;
   status: string;
   createdAt: string;
   hospede: {
-    id: string;
+    id: number;
     nome: string;
     cidade: string;
     estado: string;

@@ -8,7 +8,7 @@ import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/ProtectedRoute";
 import CalendarioReservas from "../components/CalendarioReservas";
 import { getQuartos, Quarto } from "../services/quartosService";
-import { getHospedes, Hospede } from "../services/hospedesService"; // Novo serviço
+import { getHospedes, Hospede } from "../services/hospedesService";
 
 export default function ReservasPage() {
     const { token } = useAuth();
@@ -25,6 +25,7 @@ export default function ReservasPage() {
     const [formaPagamento, setFormaPagamento] = useState<string>("Dinheiro");
     const [entrada, setEntrada] = useState<string>("");
     const [saida, setSaida] = useState<string>("");
+    const [observacao, setObservacao] = useState<string>("");
 
     useEffect(() => {
         if (!token) return;
@@ -59,22 +60,22 @@ export default function ReservasPage() {
 
     return (
         <ProtectedRoute>
-            <div className="flex min-h-screen bg-gray-100">
+            <div className="flex min-h-screen bg-[var(--sunshine)]">
                 <Sidebar />
 
                 <main className="flex-1 p-4 md:p-6 flex gap-4">
-                    {/* Coluna Esquerda */}
-                    <div className="flex-[0.4] flex flex-col gap-4">
-                        {/* Lista de quartos */}
-                        <div className="bg-white p-4 rounded-xl shadow">
-                            <h2 className="font-semibold mb-2">Quartos</h2>
-                            <ul className="grid grid-cols-5 divide-y divide-x divide-gray-200">
+                    <div className="flex-[0.4] flex flex-col gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow">
+                            <h2 className="font-semibold mb-4 text-lg">Quartos</h2>
+                            <ul className="grid grid-cols-5 gap-2">
                                 {quartos.map((q) => (
                                     <li
                                         key={q.id}
-                                        className={`p-2 cursor-pointer hover:bg-gray-100 ${q.id === quartoSelecionado ? "bg-gray-200 font-bold" : ""
+                                        className={`flex items-center justify-center h-10 border border-gray-200 cursor-pointer rounded-lg hover:bg-gray-100 ${q.id === quartoSelecionado ? "bg-gray-200 font-bold" : ""
                                             }`}
-                                        onClick={() => setQuartoSelecionado(q.id!)}
+                                        onClick={() =>
+                                            setQuartoSelecionado(q.id === quartoSelecionado ? null : (q.id ?? null))
+                                        }
                                     >
                                         {q.numero}
                                     </li>
@@ -82,31 +83,33 @@ export default function ReservasPage() {
                             </ul>
                         </div>
 
-                        {quartoSelecionado && (
-                            <div className="bg-white p-4 rounded-xl shadow">
-                                <h2 className="font-semibold mb-3">Nova Reserva</h2>
-                                <form
-                                    onSubmit={async (e) => {
-                                        e.preventDefault();
-                                        if (!hospedeId || !entrada || !saida) return;
+                        <div className="bg-white p-6 rounded-xl shadow flex-1">
+                            <h2 className="font-semibold mb-4 text-lg">Nova Reserva</h2>
+                            <form
+                                className="flex flex-col gap-4"
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!quartoSelecionado || !hospedeId || !entrada || !saida) return;
 
-                                        await createReserva(token!, {
-                                            idHospede: hospedeId,
-                                            quartoId: quartoSelecionado,
-                                            dataHoraInicial: entrada,
-                                            dataHoraFinal: saida,
-                                            formaPagamento,
-                                            status: "PENDENTE",
-                                        });
-                                    }}
-                                >
-                                    {/* Select Hóspede */}
-                                    <div className="mb-3">
-                                        <label className="block text-sm font-medium">Hóspede</label>
+                                    await createReserva(token!, {
+                                        idHospede: hospedeId,
+                                        quartoId: quartoSelecionado,
+                                        dataHoraInicial: entrada,
+                                        dataHoraFinal: saida,
+                                        formaPagamento,
+                                        status: "PENDENTE",
+                                        observacoes: observacao,
+                                    });
+                                }}
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Hóspede</label>
                                         <select
                                             value={hospedeId ?? ""}
                                             onChange={(e) => setHospedeId(Number(e.target.value))}
-                                            className="w-full p-2 border rounded"
+                                            className="w-full p-3 border rounded-lg"
+                                            disabled={!quartoSelecionado}
                                         >
                                             <option value="">Selecione</option>
                                             {hospedes.map((h) => (
@@ -117,35 +120,13 @@ export default function ReservasPage() {
                                         </select>
                                     </div>
 
-                                    {/* Entrada */}
-                                    <div className="mb-3">
-                                        <label className="block text-sm font-medium">Entrada</label>
-                                        <input
-                                            type="datetime-local"
-                                            value={entrada}
-                                            onChange={(e) => setEntrada(e.target.value)}
-                                            className="w-full p-2 border rounded"
-                                        />
-                                    </div>
-
-                                    {/* Saída */}
-                                    <div className="mb-3">
-                                        <label className="block text-sm font-medium">Saída</label>
-                                        <input
-                                            type="datetime-local"
-                                            value={saida}
-                                            onChange={(e) => setSaida(e.target.value)}
-                                            className="w-full p-2 border rounded"
-                                        />
-                                    </div>
-
-                                    {/* Forma de Pagamento */}
-                                    <div className="mb-3">
-                                        <label className="block text-sm font-medium">Forma de Pagamento</label>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Forma de Pagamento</label>
                                         <select
                                             value={formaPagamento}
                                             onChange={(e) => setFormaPagamento(e.target.value)}
-                                            className="w-full p-2 border rounded"
+                                            className="w-full p-3 border rounded-lg"
+                                            disabled={!quartoSelecionado}
                                         >
                                             {["Dinheiro", "Cartão", "Pix"].map((fp) => (
                                                 <option key={fp} value={fp}>
@@ -154,25 +135,72 @@ export default function ReservasPage() {
                                             ))}
                                         </select>
                                     </div>
+                                </div>
 
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-[var(--navy)] text-white py-2 rounded"
-                                    >
-                                        Reservar
-                                    </button>
-                                </form>
-                            </div>
-                        )}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Entrada</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={entrada}
+                                            onChange={(e) => setEntrada(e.target.value)}
+                                            className="w-full p-3 border rounded-lg"
+                                            disabled={!quartoSelecionado}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Saída</label>
+                                        <input
+                                            type="datetime-local"
+                                            value={saida}
+                                            onChange={(e) => setSaida(e.target.value)}
+                                            className="w-full p-3 border rounded-lg"
+                                            disabled={!quartoSelecionado}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Observação</label>
+                                    <textarea
+                                        value={observacao}
+                                        onChange={(e) => setObservacao(e.target.value)}
+                                        className="w-full p-3 border rounded-lg"
+                                        rows={3}
+                                        placeholder="Ex: Necessita de berço, check-in antecipado..."
+                                        disabled={!quartoSelecionado}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className={`w-full py-3 rounded-lg font-semibold text-white ${quartoSelecionado ? "bg-[var(--navy)]" : "bg-gray-300 cursor-not-allowed"
+                                        }`}
+                                    disabled={!quartoSelecionado}
+                                >
+                                    Reservar
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
 
                     {/* Coluna Direita */}
                     <div className="flex-[0.6]">
                         {quartoSelecionado ? (
-                            <CalendarioReservas reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)} />
+                            <div className="bg-white rounded-xl shadow h-full p-4">
+                                <CalendarioReservas
+                                    reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)}
+                                    isQuartoSelecionado={true}
+                                />
+                            </div>
                         ) : (
-                            <div className="text-gray-500 p-4">
-                                Selecione um quarto para ver as reservas
+                            <div className="bg-white rounded-xl shadow h-full p-4">
+                                <CalendarioReservas
+                                    reservas={reservas}
+                                    isQuartoSelecionado={false}
+                                />
                             </div>
                         )}
                     </div>
