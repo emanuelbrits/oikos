@@ -69,22 +69,45 @@ export class ReservaService {
     const dataHoraInicialDate = dto.dataHoraInicial ? new Date(dto.dataHoraInicial) : undefined;
     const dataHoraFinalDate = dto.dataHoraFinal ? new Date(dto.dataHoraFinal) : undefined;
 
-    return this.prisma.reserva.update({
-      where: { id },
-      data: {
-        dataHoraInicial: dataHoraInicialDate,
-        dataHoraFinal: dataHoraFinalDate,
-        formaPagamento: dto.formaPagamento,
-        status: dto.status,
-        observacoes: dto.observacoes,
-        hospede: {
-          connect: { id: dto.idHospede }
-        },
-        quarto: {
-          connect: { id: dto.quartoId }
+    try {
+      const hospede = await this.prisma.reserva.update({
+        where: { id },
+        data: {
+          dataHoraInicial: dataHoraInicialDate,
+          dataHoraFinal: dataHoraFinalDate,
+          formaPagamento: dto.formaPagamento,
+          status: dto.status,
+          observacoes: dto.observacoes,
+          hospede: {
+            connect: { id: dto.idHospede }
+          },
+          quarto: {
+            connect: { id: dto.quartoId }
+          }
         }
+      });
+      return {
+        success: true,
+        data: hospede,
+      };
+    } catch (error: any) {
+      console.error("Erro ao atualizar reserva:", error);
+
+      let message = "Erro ao salvar a reserva.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
       }
-    });
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   remove(id: number) {
