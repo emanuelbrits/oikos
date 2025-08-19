@@ -1,3 +1,6 @@
+import { Hospede } from "./hospedesService";
+import { Quarto } from "./quartosService";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface Reserva {
@@ -10,16 +13,8 @@ export interface Reserva {
   createdAt: string;
   formaPagamento: string;
   observacoes?: string;
-  hospede: {
-    id: number;
-    nome: string;
-    cidade: string;
-    estado: string;
-  };
-  quarto: {
-    id: number;
-    numero: number;
-  };
+  hospede: Hospede;
+  quarto: Quarto;
 }
 
 export async function getReservas(token: string): Promise<Reserva[]> {

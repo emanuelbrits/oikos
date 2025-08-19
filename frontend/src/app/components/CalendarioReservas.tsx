@@ -1,3 +1,4 @@
+// CalendarioReservas.tsx
 "use client";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -15,16 +16,79 @@ interface CalendarioReservasProps {
   onReservasChange?: (reservas: Reserva[]) => void;
 }
 
-export default function CalendarioReservas({ reservas, token, onReservasChange }: CalendarioReservasProps) {
+export default function CalendarioReservas({
+  reservas,
+  token,
+  onReservasChange,
+}: CalendarioReservasProps) {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservaSelecionada, setReservaSelecionada] = useState<Reserva | null>(null);
 
   const [reservasState, setReservasState] = useState<Reserva[]>(reservas);
+  const [laneMap, setLaneMap] = useState<Record<number, number>>({}); 
+  const [maxLanes, setMaxLanes] = useState(0);
 
   useEffect(() => {
     setReservasState(reservas);
   }, [reservas]);
+
+  useEffect(() => {
+    computeLanes();
+  }, [reservasState, currentMonth]);
+
+  const computeLanes = () => {
+    const monthStart = currentMonth.startOf("month").startOf("day");
+    const monthEnd = currentMonth.endOf("month").endOf("day");
+
+    const visible = reservasState.filter((r) => {
+      const start = dayjs(r.dataHoraInicial).startOf("day");
+      const end = dayjs(r.dataHoraFinal).endOf("day");
+      return !(end.isBefore(monthStart) || start.isAfter(monthEnd));
+    });
+
+    visible.sort((a, b) => {
+      const aStart = dayjs(a.dataHoraInicial).valueOf();
+      const bStart = dayjs(b.dataHoraInicial).valueOf();
+      if (aStart !== bStart) return aStart - bStart;
+      const aDur = dayjs(a.dataHoraFinal).diff(dayjs(a.dataHoraInicial), "day");
+      const bDur = dayjs(b.dataHoraFinal).diff(dayjs(b.dataHoraInicial), "day");
+      return bDur - aDur;
+    });
+
+    const lanes: Array<Reserva[]> = [];
+    const map: Record<number, number> = {};
+
+    const overlaps = (rA: Reserva, rB: Reserva) => {
+      const aStart = dayjs(rA.dataHoraInicial).startOf("day");
+      const aEnd = dayjs(rA.dataHoraFinal).endOf("day");
+      const bStart = dayjs(rB.dataHoraInicial).startOf("day");
+      const bEnd = dayjs(rB.dataHoraFinal).endOf("day");
+      // se intersectam no intervalo de dias (inclusive)
+      return !(aEnd.isBefore(bStart) || aStart.isAfter(bEnd));
+    };
+
+    visible.forEach((r) => {
+      let assignedLane = -1;
+      for (let i = 0; i < lanes.length; i++) {
+        const lane = lanes[i];
+        const conflict = lane.some((lr) => overlaps(lr, r));
+        if (!conflict) {
+          assignedLane = i;
+          lane.push(r);
+          break;
+        }
+      }
+      if (assignedLane === -1) {
+        lanes.push([r]);
+        assignedLane = lanes.length - 1;
+      }
+      if (r.id != null) map[r.id] = assignedLane;
+    });
+
+    setLaneMap(map);
+    setMaxLanes(lanes.length);
+  };
 
   const prevMonth = () => setCurrentMonth(currentMonth.subtract(1, "month"));
   const nextMonth = () => setCurrentMonth(currentMonth.add(1, "month"));
@@ -35,8 +99,8 @@ export default function CalendarioReservas({ reservas, token, onReservasChange }
 
   const coresReservas = [
     "bg-[var(--seaBlue)] text-[var(--sunshine)]",
-    "bg-[var(--navy)] text-[var(--sunshine)]",
     "bg-[var(--spray)] text-[var(--navy)]",
+    "bg-[var(--navy)] text-[var(--sunshine)]",
     "bg-[var(--sunshine)] text-[var(--navy)]",
     "bg-[var(--geranium)] text-[var(--navy)]",
   ];
@@ -67,28 +131,34 @@ export default function CalendarioReservas({ reservas, token, onReservasChange }
         {datesArray.map((day) => {
           const date = currentMonth.date(day);
 
-          const reservasDoDia = reservasState.filter((r) => {
-            const inicio = dayjs(r.dataHoraInicial);
-            const fim = dayjs(r.dataHoraFinal);
-            return date.isBetween(inicio, fim, "day", "[]");
-          });
+          const reservasDoDia = reservasState
+            .filter((r) => {
+              const inicio = dayjs(r.dataHoraInicial).startOf("day");
+              const fim = dayjs(r.dataHoraFinal).endOf("day");
+              return !(fim.isBefore(date.startOf("day")) || inicio.isAfter(date.endOf("day")));
+            })
+            .sort((a, b) => {
+              const la = a.id != null ? (laneMap[a.id] ?? 9999) : 9999;
+              const lb = b.id != null ? (laneMap[b.id] ?? 9999) : 9999;
+              return la - lb;
+            });
 
           return (
             <div key={day} className="border border-gray-200 text-xs flex flex-col min-h-[60px] h-auto">
               <div className="font-bold text-gray-700 text-center">{day}</div>
               <div className="flex flex-col gap-0.5 overflow-hidden">
-                {reservasDoDia.map((res, idx) => {
-                  const cor = coresReservas[idx % coresReservas.length];
+                {reservasDoDia.map((res) => {
+                  const lane = res.id != null ? (laneMap[res.id] ?? 0) : 0;
+                  const cor = coresReservas[lane % coresReservas.length];
+
                   const dataInicial = dayjs(res.dataHoraInicial).format("YYYY-MM-DD");
                   const dataFinal = dayjs(res.dataHoraFinal).format("YYYY-MM-DD");
-                  const mostrarTexto =
-                    date.format("YYYY-MM-DD") === dataInicial ||
-                    date.format("YYYY-MM-DD") === dataFinal;
+                  const mostrarTexto = date.format("YYYY-MM-DD") === dataInicial || date.format("YYYY-MM-DD") === dataFinal;
 
                   return (
                     <div
-                      key={res.id ?? idx}
-                      className={`px-1 ${cor} text-center text-sm overflow-hidden cursor-pointer`}
+                      key={res.id}
+                      className={`px-1 ${cor} text-center text-sm overflow-hidden cursor-pointer mb-1`}
                       style={{ height: "18px" }}
                       onClick={() => {
                         setReservaSelecionada(res);
@@ -111,12 +181,13 @@ export default function CalendarioReservas({ reservas, token, onReservasChange }
           reserva={reservaSelecionada}
           onClose={async (isEdited, deleted) => {
             setIsModalOpen(false);
+            setReservaSelecionada(null);
             if (isEdited || deleted) {
               const novas = await getReservas(token);
               setReservasState(novas);
 
               if (onReservasChange) {
-                onReservasChange(novas); 
+                onReservasChange(novas);
               }
             }
           }}

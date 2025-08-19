@@ -199,7 +199,7 @@ export default function ReservasPage() {
                             <div className="bg-white rounded-xl shadow h-full p-4">
                                 <CalendarioReservas
                                     reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)}
-                                    token = {token!}
+                                    token={token!}
                                     onReservasChange={(novas) => setReservas(novas)}
                                 />
                             </div>
@@ -207,7 +207,8 @@ export default function ReservasPage() {
                             <div className="bg-white rounded-xl shadow h-full p-4">
                                 <CalendarioReservas
                                     reservas={reservas}
-                                    token = {token!}
+                                    token={token!}
+                                    onReservasChange={(novas) => setReservas(novas)}
                                 />
                             </div>
                         )}
