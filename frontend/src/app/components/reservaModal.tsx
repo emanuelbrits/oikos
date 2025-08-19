@@ -3,16 +3,17 @@ import { useAuth } from "../contexts/AuthContext";
 import ConfirmModal from "./ConfirmModal";
 import { FaBed, FaCalendarAlt, FaCreditCard, FaInfo, FaStickyNote } from "react-icons/fa";
 import { deleteReserva, Reserva } from "../services/reservasService";
-import { MdDelete, MdEdit, MdPerson } from "react-icons/md";
+import { MdDelete, MdEdit } from "react-icons/md";
 import EditReservaModal from "./EditReserva";
+import { set } from "date-fns";
 
-interface HospedeModalProps {
+interface ReservaModalProps {
     isOpen: boolean;
     onClose: (isEdited: boolean, isDeleted: boolean, reserva: Reserva) => void;
     reserva: Reserva;
 }
 
-export default function ReservaModal({ isOpen, onClose, reserva }: HospedeModalProps) {
+export default function ReservaModal({ isOpen, onClose, reserva }: ReservaModalProps) {
     const { token } = useAuth();
     const [reservaEditSelecionada, setReservaEditSelecionada] = useState<Reserva | null>(null);
     const [reservaSelecionada, setReservaSelecionada] = useState<Reserva | null>(null);
@@ -20,7 +21,6 @@ export default function ReservaModal({ isOpen, onClose, reserva }: HospedeModalP
     const [reservaRemoveSelecionada, setReservaRemoveSelecionada] = useState<number | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [edited, setEdited] = useState(false);
-    const [deleted] = useState(false);
 
     useEffect(() => {
         setReservaSelecionada(reserva);
@@ -52,7 +52,7 @@ export default function ReservaModal({ isOpen, onClose, reserva }: HospedeModalP
     if (!reservaSelecionada) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/1 z-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50 p-4">
             <div
                 key={reservaSelecionada?.id}
                 className="bg-gray-100 rounded-xl p-6 pt-4 flex flex-col justify-between border-t-4 border-[var(--navy)]"
@@ -79,13 +79,14 @@ export default function ReservaModal({ isOpen, onClose, reserva }: HospedeModalP
                             {reservaEditSelecionada && (
                                 <EditReservaModal
                                     isOpen={isEditingModalOpen}
-                                    onClose={() => {
+                                    onClose={(edited) => {
+                                        setEdited(edited);
                                         setIsEditingModalOpen(false);
                                     }}
-                                    onSave={(reserva) => {
-                                        setIsEditingModalOpen(false);
-                                        setEdited(true);
+                                    onSave={(reserva, edited) => {
+                                        setEdited(edited);
                                         setReservaSelecionada(reserva);
+                                        setIsEditingModalOpen(false);
                                     }}
                                     reserva={reservaEditSelecionada}
                                 />
@@ -105,12 +106,12 @@ export default function ReservaModal({ isOpen, onClose, reserva }: HospedeModalP
                             </button>
                             <ConfirmModal
                                 isOpen={modalOpen}
-                                onClose={() => setModalOpen(false)}
                                 onConfirm={() => {
                                     reservaRemoveSelecionada &&
                                         removeReserva(reservaRemoveSelecionada);
                                     onClose(edited, true, reservaSelecionada);
                                 }}
+                                onClose={() => setModalOpen(false)}
                                 title="Excluir reserva"
                                 message="Tem certeza que deseja remover esta reserva? Essa ação não poderá ser desfeita."
                             />
@@ -168,7 +169,7 @@ export default function ReservaModal({ isOpen, onClose, reserva }: HospedeModalP
                     </div>
 
                     <div
-                        onClick={() => onClose(edited, deleted, reservaSelecionada)}
+                        onClick={() => onClose(edited, false, reservaSelecionada)}
                         className="flex mt-2 justify-center"
                     >
                         <button className="bg-[var(--navy)] text-[var(--sunshine)] text-lg px-4 py-2 rounded-lg hover:bg-[var(--navy)]/90 transition-colors cursor-pointer w-full md:w-auto h-[3.125rem] flex items-center justify-center">

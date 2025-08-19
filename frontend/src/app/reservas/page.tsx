@@ -97,9 +97,17 @@ export default function ReservasPage() {
                                         dataHoraInicial: entrada,
                                         dataHoraFinal: saida,
                                         formaPagamento,
-                                        status: "PENDENTE",
+                                        status: "Reservado",
                                         observacoes: observacao,
                                     });
+
+                                    const reservasAtualizadas = await getReservas(token!);
+                                    setReservas(reservasAtualizadas);
+
+                                    setHospedeId(null);
+                                    setEntrada("");
+                                    setSaida("");
+                                    setObservacao("");
                                 }}
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -186,20 +194,20 @@ export default function ReservasPage() {
 
                     </div>
 
-                    {/* Coluna Direita */}
                     <div className="flex-[0.6]">
                         {quartoSelecionado ? (
                             <div className="bg-white rounded-xl shadow h-full p-4">
                                 <CalendarioReservas
                                     reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)}
-                                    isQuartoSelecionado={true}
+                                    token = {token!}
+                                    onReservasChange={(novas) => setReservas(novas)}
                                 />
                             </div>
                         ) : (
                             <div className="bg-white rounded-xl shadow h-full p-4">
                                 <CalendarioReservas
                                     reservas={reservas}
-                                    isQuartoSelecionado={false}
+                                    token = {token!}
                                 />
                             </div>
                         )}

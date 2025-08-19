@@ -13,7 +13,6 @@ export class AuthService {
   async validateUser(usernameOrEmail: string, pass: string) {
     let user;
 
-    // Detecta se é um e-mail (tem @)
     if (usernameOrEmail.includes('@')) {
       user = await this.usersService.findByEmail(usernameOrEmail);
     } else {

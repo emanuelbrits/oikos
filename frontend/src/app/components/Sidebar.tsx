@@ -23,7 +23,6 @@ export default function Sidebar({ title = "Menu" }: SidebarProps) {
   const [open, setOpen] = useState(true);
   const { logout } = useAuth();
 
-  // Controla apenas no mobile/tablet
   useEffect(() => {
     if (window.innerWidth < 1024) {
       setOpen(false);
@@ -45,7 +44,6 @@ export default function Sidebar({ title = "Menu" }: SidebarProps) {
 
   return (
     <div className="flex">
-      {/* Botão hamburger */}
       <button
         onClick={() => setOpen(!open)}
         className="lg:hidden fixed top-4 right-4 z-50 text-[var(--sunshine)] text-2xl p-2 bg-[var(--navy)] rounded-md"
@@ -53,7 +51,6 @@ export default function Sidebar({ title = "Menu" }: SidebarProps) {
         {open ? <FiX /> : <FiMenu />}
       </button>
 
-      {/* Sidebar */}
       <div
         className={`
       bg-[var(--navy)] text-[var(--sunshine)] transition-all duration-300 flex flex-col

@@ -34,7 +34,6 @@ export default function EditQuartoModal({ isOpen, onClose, quarto }: EditQuartoM
         };
     }, [isOpen]);
 
-    // Sincroniza o estado ao abrir o modal, mantendo o status inicial
     useEffect(() => {
         if (isOpen) {
             setNumero(quarto.numero.toString());

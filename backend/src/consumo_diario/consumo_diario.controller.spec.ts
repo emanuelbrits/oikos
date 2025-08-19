@@ -59,7 +59,7 @@ describe('ConsumoDiarioController (e2e-like validation)', () => {
 
     it('❌ deve falhar se algum campo obrigatório estiver faltando', async () => {
       const dto = {
-        produtoId: 2, // hospedagemId está faltando
+        produtoId: 2,
         quantidade: 3,
         valorUnitario: 10.5,
         dataConsumo: '2025-08-11T10:00:00Z',

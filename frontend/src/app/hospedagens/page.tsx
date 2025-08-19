@@ -39,7 +39,6 @@ export default function HospedagensPage() {
 
     const ITEMS_PER_PAGE = 20;
 
-    // Filtra hospedagens de acordo com o hóspede selecionado
     const filteredHospedagens = hospedeId === ""
         ? hospedagens
         : hospedagens.filter(h => h.hospede.id === Number(hospedeId));
