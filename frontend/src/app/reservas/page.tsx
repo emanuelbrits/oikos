@@ -128,7 +128,7 @@ export default function ReservasPage() {
                                             className="w-full p-3 border rounded-lg"
                                             disabled={!quartoSelecionado}
                                         >
-                                            {["Dinheiro", "Cartão", "Pix"].map((fp) => (
+                                            {["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Pix"].map((fp) => (
                                                 <option key={fp} value={fp}>
                                                     {fp}
                                                 </option>
@@ -175,7 +175,7 @@ export default function ReservasPage() {
 
                                 <button
                                     type="submit"
-                                    className={`w-full py-3 rounded-lg font-semibold text-white ${quartoSelecionado ? "bg-[var(--navy)]" : "bg-gray-300 cursor-not-allowed"
+                                    className={`w-full py-3 rounded-lg font-semibold text-white cursor-pointer ${quartoSelecionado ? "bg-[var(--navy)] hover:bg-[var(--seaBlue)] transition-colors duration-300" : "bg-gray-300 cursor-not-allowed"
                                         }`}
                                     disabled={!quartoSelecionado}
                                 >

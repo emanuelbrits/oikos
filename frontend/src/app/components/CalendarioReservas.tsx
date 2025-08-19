@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import "dayjs/locale/pt-br";
 import { Reserva } from "../services/reservasService";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import ReservaModal from "./reservaModal";
 
 dayjs.extend(isBetween);
 
@@ -14,6 +16,8 @@ interface CalendarioReservasProps {
 
 export default function CalendarioReservas({ reservas, isQuartoSelecionado }: CalendarioReservasProps) {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reservaSelecionada, setReservaSelecionada] = useState<Reserva | null>(null);
 
   const prevMonth = () => setCurrentMonth(currentMonth.subtract(1, "month"));
   const nextMonth = () => setCurrentMonth(currentMonth.add(1, "month"));
@@ -35,14 +39,14 @@ export default function CalendarioReservas({ reservas, isQuartoSelecionado }: Ca
     <div className="bg-white p-4 rounded-xl shadow h-full flex flex-col">
       {/* Cabeçalho */}
       <div className="flex justify-between items-center mb-4">
-        <button onClick={prevMonth} className="px-3 py-1 bg-gray-200 rounded">
-          {"<"}
+        <button onClick={prevMonth} className="px-2 py-2 bg-[var(--navy)] hover:bg-[var(--seaBlue)] transition-colors duration-300 rounded cursor-pointer">
+          <FaChevronLeft className="text-[var(--sunshine)] text-xl" />
         </button>
-        <h2 className="font-bold text-lg capitalize">
+        <h2 className="text-[var(--navy)] font-bold text-2xl capitalize">
           {currentMonth.locale("pt-br").format("MMMM YYYY")}
         </h2>
-        <button onClick={nextMonth} className="px-3 py-1 bg-gray-200 rounded">
-          {">"}
+        <button onClick={nextMonth} className="px-2 py-2 bg-[var(--navy)] hover:bg-[var(--seaBlue)] transition-colors duration-300 rounded cursor-pointer">
+          <FaChevronRight className="text-[var(--sunshine)] text-xl" />
         </button>
       </div>
 
@@ -82,24 +86,22 @@ export default function CalendarioReservas({ reservas, isQuartoSelecionado }: Ca
                   const dataInicial = dayjs(res.dataHoraInicial).format("YYYY-MM-DD");
                   const dataFinal = dayjs(res.dataHoraFinal).format("YYYY-MM-DD");
                   const mostrarTexto = date.format("YYYY-MM-DD") === dataInicial || date.format("YYYY-MM-DD") === dataFinal;
-                  const handleClick = () => {
-                    
-                  };
 
                   return (
                     <div
                       key={idx}
                       className={`px-1 ${cor} text-center text-sm overflow-hidden cursor-pointer`}
                       style={{ height: "18px" }}
-                      onClick={handleClick}
+                      onClick={() => [setIsModalOpen(true), setReservaSelecionada(res)]}
                     >
                       {mostrarTexto
-                        ? `${isQuartoSelecionado ? "" : `Quarto ${res.quarto.numero} - `}${res.hospede?.nome ?? "Reserva"}`
+                        ? `${res.hospede?.nome ?? "Reserva"}`
                         : null}
                     </div>
                   );
                 })}
               </div>
+              <ReservaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} reserva={reservaSelecionada!} />
             </div>
           );
         })}
