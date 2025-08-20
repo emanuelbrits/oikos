@@ -153,7 +153,30 @@ export default function ReservaModal({ isOpen, onClose, reserva }: ReservaModalP
                             <FaInfo className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                             <div className="flex flex-col">
                                 <h2 className="text-lg">Status</h2>
-                                <p className="text-gray-600 text-base">{reservaSelecionada.status}</p>
+                                <span
+                                    className={`inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full w-[8rem] ${reservaSelecionada.status === "Reservado"
+                                        ? "bg-[var(--navy)] text-[var(--sunshine)] border-1 border-[var(--sunshine)"
+                                        : reservaSelecionada.status === "Cancelado"
+                                            ? "bg-red-600 text-white border-1 border-white"
+                                            : reservaSelecionada.status === "Na fila"
+                                                ? "bg-[var(--sunshine)] text-[var(--navy)] border-1 border-[var(--navy)]"
+                                                : reservaSelecionada.status === "Expirado"
+                                                    ? "bg-orange-400 text-[var(--navy)] border-1 border-[var(--navy)]"
+                                                    : "bg-gray-100 text-gray-800 border-1 border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                                        }`}
+                                >
+                                    <span className={`w-2 h-2 me-1 rounded-full ${reservaSelecionada.status === "Reservado"
+                                        ? "bg-[var(--sunshine)]"
+                                        : reservaSelecionada.status === "Cancelado"
+                                            ? "bg-white"
+                                            : reservaSelecionada.status === "Na fila"
+                                                ? "bg-[var(--navy)]"
+                                                : reservaSelecionada.status === "Expirado"
+                                                    ? "bg-[var(--navy)]"
+                                                    : "bg-gray-500"
+                                        }`}></span>
+                                    {reservaSelecionada.status}
+                                </span>
                             </div>
                         </div>
 

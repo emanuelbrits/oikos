@@ -9,6 +9,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import CalendarioReservas from "../components/CalendarioReservas";
 import { getQuartos, Quarto } from "../services/quartosService";
 import { getHospedes, Hospede } from "../services/hospedesService";
+import QuadroReservas from "../components/QuadroReservas";
 
 export default function ReservasPage() {
     const { token } = useAuth();
@@ -19,6 +20,7 @@ export default function ReservasPage() {
 
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState<string>("");
+    const [calendarVisible, setCalendarVisible] = useState<boolean>(true);
 
     const [quartoSelecionado, setQuartoSelecionado] = useState<number | null>(null);
     const [hospedeId, setHospedeId] = useState<number | null>(null);
@@ -194,25 +196,62 @@ export default function ReservasPage() {
 
                     </div>
 
-                    <div className="flex-[0.6]">
-                        {quartoSelecionado ? (
-                            <div className="bg-white rounded-xl shadow h-full p-4">
-                                <CalendarioReservas
-                                    reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)}
-                                    token={token!}
-                                    onReservasChange={(novas) => setReservas(novas)}
-                                />
+
+                    {calendarVisible ?
+                        <div className="flex-[0.6] bg-white rounded-xl shadow h-full p-4 flex flex-col">
+                            <div className="flex justify-end mb-4">
+                                <button
+                                    onClick={() => setCalendarVisible(false)}
+                                    className="px-3 py-1.5 text-lg rounded-md bg-[var(--navy)] text-[var(--sunshine)] hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
+                                >
+                                    Ver em Quadro
+                                </button>
                             </div>
-                        ) : (
-                            <div className="bg-white rounded-xl shadow h-full p-4">
-                                <CalendarioReservas
-                                    reservas={reservas}
-                                    token={token!}
-                                    onReservasChange={(novas) => setReservas(novas)}
-                                />
+
+                            <div className="flex-1 min-h-0">
+                                {quartoSelecionado ? (
+                                    <CalendarioReservas
+                                        reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)}
+                                        token={token!}
+                                        onReservasChange={(novas) => setReservas(novas)}
+                                    />
+                                ) : (
+                                    <CalendarioReservas
+                                        reservas={reservas}
+                                        token={token!}
+                                        onReservasChange={(novas) => setReservas(novas)}
+                                    />
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                        :
+                        <div className="flex-[0.6] bg-white rounded-xl shadow min-h-0 p-4 flex flex-col">
+                            <div className="flex justify-end mb-4">
+                                <button
+                                    onClick={() => setCalendarVisible(true)}
+                                    className="px-3 py-1.5 text-lg rounded-md bg-[var(--navy)] text-[var(--sunshine)] hover:bg-[var(--navy)]/90 transition-colors cursor-pointer"
+                                >
+                                    Ver em Calendário
+                                </button>
+                            </div>
+                            <div className="flex-1 min-h-0">
+                                {quartoSelecionado ? (
+                                    <QuadroReservas
+                                        reservas={reservas.filter(r => r.quarto.id === quartoSelecionado)}
+                                        token={token!}
+                                        onReservasChange={(novas) => setReservas(novas)}
+                                    />
+                                ) : (
+                                    <QuadroReservas
+                                        reservas={reservas}
+                                        token={token!}
+                                        onReservasChange={(novas) => setReservas(novas)}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    }
+
                 </main>
             </div>
         </ProtectedRoute>
