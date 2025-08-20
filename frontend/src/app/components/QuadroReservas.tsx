@@ -29,6 +29,7 @@ export default function QuadroReservas({
     "Na fila": 2,
     "Expirado": 3,
     "Cancelado": 4,
+    "Finalizado": 5,
   };
 
   const statusColors: Record<string, string> = {
@@ -39,15 +40,46 @@ export default function QuadroReservas({
     "Finalizado": "bg-gray-500 text-white",
   };
 
+  // Filtros de status (todos começam marcados)
+  const allStatuses = Object.keys(statusOrder);
+  const [statusFilter, setStatusFilter] = useState<Record<string, boolean>>(
+    Object.fromEntries(allStatuses.map((s) => [s, true]))
+  );
+
   useEffect(() => {
     setReservasState(reservas);
   }, [reservas]);
 
+  const reservasFiltradas = reservasState.filter((res) => statusFilter[res.status ?? ""]);
+
   return (
     <div className="bg-[var(--sunshine)]/10 p-4 rounded-xl shadow flex flex-col max-h-[80vh] min-h-0">
+      <div className="flex flex-wrap gap-4 mb-4">
+        <h2 className="text-[var(--navy)] font-bold text-lg">Exibir:</h2>
+        {allStatuses.map((status) => (
+          <label key={status} className="flex items-center gap-2 text-lg cursor-pointer">
+            <input
+              type="checkbox"
+              checked={statusFilter[status]}
+              onChange={() =>
+                setStatusFilter((prev) => ({
+                  ...prev,
+                  [status]: !prev[status],
+                }))
+              }
+            />
+            {status}
+          </label>
+        ))}
+      </div>
+
       <div className="flex-1 min-h-0 overflow-y-auto pr-2">
-        {[...reservasState]
+        {[...reservasFiltradas]
           .sort((a, b) => {
+            if (a.status === "Na fila" && b.status === "Na fila") {
+              return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            }
+            
             const startA = dayjs(a.dataHoraInicial).valueOf();
             const startB = dayjs(b.dataHoraInicial).valueOf();
             if (startA !== startB) return startA - startB;
@@ -80,15 +112,11 @@ export default function QuadroReservas({
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <h2 className="text-base">Data de Início</h2>
-                  <div className="font-bold">
-                    {dayjs(res.dataHoraInicial).format("DD/MM")}
-                  </div>
+                  <div className="font-bold">{dayjs(res.dataHoraInicial).format("DD/MM")}</div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <h2 className="text-base">Data de Saída</h2>
-                  <div className="font-bold">
-                    {dayjs(res.dataHoraFinal).format("DD/MM")}
-                  </div>
+                  <div className="font-bold">{dayjs(res.dataHoraFinal).format("DD/MM")}</div>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <h2 className="text-base">Hóspede</h2>
@@ -120,5 +148,4 @@ export default function QuadroReservas({
       )}
     </div>
   );
-
 }

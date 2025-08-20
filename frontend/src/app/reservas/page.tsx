@@ -20,7 +20,7 @@ export default function ReservasPage() {
 
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState<string>("");
-    const [calendarVisible, setCalendarVisible] = useState<boolean>(true);
+    const [calendarVisible, setCalendarVisible] = useState<boolean>(false);
 
     const [quartoSelecionado, setQuartoSelecionado] = useState<number | null>(null);
     const [hospedeId, setHospedeId] = useState<number | null>(null);
@@ -93,16 +93,39 @@ export default function ReservasPage() {
                                     e.preventDefault();
                                     if (!quartoSelecionado || !hospedeId || !entrada || !saida) return;
 
+                                    if (new Date(saida) <= new Date(entrada)) {
+                                        alert("A data de saída deve ser posterior à data de entrada.");
+                                        return;
+                                    }
+
+                                    const reservasDoQuarto = (await getReservas(token!)).filter(reserva => reserva.quarto.id === quartoSelecionado);
+
+                                    const conflito = reservasDoQuarto.some(reserva => {
+                                        if (reserva.status !== "Reservado") return false;
+
+                                        const inicioExistente = new Date(reserva.dataHoraInicial);
+                                        const fimExistente = new Date(reserva.dataHoraFinal);
+                                        const novaEntrada = new Date(entrada);
+
+                                        // Se a data inicial da nova reserva estiver dentro do intervalo existente
+                                        return novaEntrada >= inicioExistente && novaEntrada < fimExistente;
+                                    });
+
+                                    // 3. Definir status de acordo com o conflito
+                                    const statusReserva = conflito ? "Na fila" : "Reservado";
+
+                                    // 4. Criar a reserva
                                     await createReserva(token!, {
                                         idHospede: hospedeId,
                                         quartoId: quartoSelecionado,
                                         dataHoraInicial: entrada,
                                         dataHoraFinal: saida,
                                         formaPagamento,
-                                        status: "Reservado",
+                                        status: statusReserva,
                                         observacoes: observacao,
                                     });
 
+                                    // 5. Atualizar reservas e limpar formulário
                                     const reservasAtualizadas = await getReservas(token!);
                                     setReservas(reservasAtualizadas);
 

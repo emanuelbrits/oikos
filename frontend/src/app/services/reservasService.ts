@@ -1,5 +1,6 @@
 import { Hospede } from "./hospedesService";
 import { Quarto } from "./quartosService";
+import dayjs from "dayjs";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,6 +18,7 @@ export interface Reserva {
   quarto: Quarto;
 }
 
+
 export async function getReservas(token: string): Promise<Reserva[]> {
   const res = await fetch(`${API_URL}/reserva`, {
     headers: {
@@ -29,7 +31,19 @@ export async function getReservas(token: string): Promise<Reserva[]> {
     throw new Error("Erro ao buscar reservas");
   }
 
-  return res.json();
+  const reservas: Reserva[] = await res.json();
+  const agora = dayjs();
+
+  // Atualizar status localmente
+  return reservas.map((reserva) => {
+    if (
+      reserva.status === "Reservado" &&
+      dayjs(reserva.dataHoraInicial).isBefore(agora)
+    ) {
+      return { ...reserva, status: "Expirado" };
+    }
+    return reserva;
+  });
 }
 
 export async function createReserva(token: string, reservaData: any) {

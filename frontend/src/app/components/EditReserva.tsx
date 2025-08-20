@@ -210,7 +210,7 @@ export default function EditReservaModal({
                             className="w-full p-2 bg-[var(--sunshine)]/50 border border-[var(--navy)]/20"
                         >
                             <option value="">Selecione</option>
-                            {["Reservado", "Na fila", "Expirado", "Cancelado", "Finalizado"].map((q) => (
+                            {["Reservado", "Na fila", "Cancelado", "Finalizado"].map((q) => (
                                 <option key={q} value={q}>
                                     {q}
                                 </option>
