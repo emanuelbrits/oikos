@@ -106,15 +106,19 @@ export default function ReservasPage() {
                                         const inicioExistente = new Date(reserva.dataHoraInicial);
                                         const fimExistente = new Date(reserva.dataHoraFinal);
                                         const novaEntrada = new Date(entrada);
+                                        const novaSaida = new Date(saida);
 
-                                        // Se a data inicial da nova reserva estiver dentro do intervalo existente
-                                        return novaEntrada >= inicioExistente && novaEntrada < fimExistente;
+                                        const entradaConflito = novaEntrada >= inicioExistente && novaEntrada < fimExistente;
+
+                                        const saidaConflito = novaSaida > inicioExistente && novaSaida <= fimExistente;
+
+                                        const envolveConflito = novaEntrada <= inicioExistente && novaSaida >= fimExistente;
+
+                                        return entradaConflito || saidaConflito || envolveConflito;
                                     });
 
-                                    // 3. Definir status de acordo com o conflito
                                     const statusReserva = conflito ? "Na fila" : "Reservado";
 
-                                    // 4. Criar a reserva
                                     await createReserva(token!, {
                                         idHospede: hospedeId,
                                         quartoId: quartoSelecionado,
@@ -125,7 +129,6 @@ export default function ReservasPage() {
                                         observacoes: observacao,
                                     });
 
-                                    // 5. Atualizar reservas e limpar formulário
                                     const reservasAtualizadas = await getReservas(token!);
                                     setReservas(reservasAtualizadas);
 

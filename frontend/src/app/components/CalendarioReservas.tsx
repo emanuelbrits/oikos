@@ -64,7 +64,6 @@ export default function CalendarioReservas({
       const aEnd = dayjs(rA.dataHoraFinal).endOf("day");
       const bStart = dayjs(rB.dataHoraInicial).startOf("day");
       const bEnd = dayjs(rB.dataHoraFinal).endOf("day");
-      // se intersectam no intervalo de dias (inclusive)
       return !(aEnd.isBefore(bStart) || aStart.isAfter(bEnd));
     };
 
@@ -182,8 +181,10 @@ export default function CalendarioReservas({
           onClose={async (isEdited, deleted) => {
             setIsModalOpen(false);
             setReservaSelecionada(null);
+            
             if (isEdited || deleted) {
-              const novas = await getReservas(token);
+              const novas = reservasState.filter((r) => r.id !== reservaSelecionada?.id);
+              
               setReservasState(novas);
 
               if (onReservasChange) {

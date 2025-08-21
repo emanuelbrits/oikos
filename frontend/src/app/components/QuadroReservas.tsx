@@ -79,7 +79,7 @@ export default function QuadroReservas({
             if (a.status === "Na fila" && b.status === "Na fila") {
               return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
             }
-            
+
             const startA = dayjs(a.dataHoraInicial).valueOf();
             const startB = dayjs(b.dataHoraInicial).valueOf();
             if (startA !== startB) return startA - startB;
@@ -139,9 +139,13 @@ export default function QuadroReservas({
             setIsModalOpen(false);
             setReservaSelecionada(null);
             if (isEdited || deleted) {
-              const novas = await getReservas(token);
+              const novas = reservasState.filter((r) => r.id !== reservaSelecionada?.id);
+
               setReservasState(novas);
-              onReservasChange?.(novas);
+
+              if (onReservasChange) {
+                onReservasChange(novas);
+              }
             }
           }}
         />
