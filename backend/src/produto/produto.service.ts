@@ -6,10 +6,34 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProdutoService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  create(data: Prisma.ProdutoCreateInput) {
-    return this.prisma.produto.create({ data });
+  async create(data: Prisma.ProdutoCreateInput) {
+
+    try {
+      const produto = await this.prisma.produto.create({ data });
+      return {
+        success: true,
+        data: produto,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar produto:", error);
+
+      let message = "Erro ao salvar o produto.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   findAll() {
@@ -34,11 +58,34 @@ export class ProdutoService {
     });
   }
 
-  update(id: number, updateProdutoDto: UpdateProdutoDto) {
-    return this.prisma.produto.update({
-      where: { id },
-      data: updateProdutoDto,
-    });
+  async update(id: number, updateProdutoDto: UpdateProdutoDto) {
+    try {
+      const produto = await this.prisma.produto.update({
+        where: { id },
+        data: updateProdutoDto,
+      });
+      return {
+        success: true,
+        data: produto,
+      };
+    } catch (error: any) {
+      console.error("Erro ao atualizar produto:", error);
+
+      let message = "Erro ao salvar o produto.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
+      }
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   remove(id: number) {

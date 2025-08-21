@@ -25,7 +25,7 @@ export class ProdutoController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('buscar')
+  @Get('buscar/nome')
   @ApiOperation({ summary: 'Buscar produtos por nome' })
   findByName(@Query('nome') nome: string) {
     return this.produtoService.findByName(nome);
