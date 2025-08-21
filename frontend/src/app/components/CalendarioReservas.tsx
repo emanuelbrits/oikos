@@ -178,12 +178,24 @@ export default function CalendarioReservas({
         <ReservaModal
           isOpen={isModalOpen}
           reserva={reservaSelecionada}
-          onClose={async (isEdited, deleted) => {
+          onClose={async (isEdited, deleted, reserva) => {
+            
             setIsModalOpen(false);
             setReservaSelecionada(null);
+
+            if(isEdited) {
+              const index = reservasState.findIndex((r) => r.id === reserva?.id);
+              
+              if (index !== -1) {
+                const updated = [...reservasState];
+                
+                updated[index] = { ...updated[index], ...reserva };
+                setReservasState(updated);
+              }
+            }
             
-            if (isEdited || deleted) {
-              const novas = reservasState.filter((r) => r.id !== reservaSelecionada?.id);
+            if (deleted) {
+              const novas = reservasState.filter((r) => r.id !== reserva?.id);
               
               setReservasState(novas);
 
