@@ -2,26 +2,41 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { MdAdd } from "react-icons/md";
+import { MdAdd, MdDelete, MdEdit } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
 import LoadingScreen from "../components/loadingScreen";
-import { getHospedagens, Hospedagem } from "../services/hospedagensService";
+import { deleteHospedagem, getHospedagens, Hospedagem } from "../services/hospedagensService";
 import AddHospedagemModal from "../components/AddHospedagemModal";
-import HospedagemModal from "../components/hospedagemModal";
 import { getHospedes, Hospede } from "../services/hospedesService";
+import { FaCalendarAlt, FaMoneyBillWave } from "react-icons/fa";
+import { FaPerson } from "react-icons/fa6";
+import { getQuartos, Quarto } from "../services/quartosService";
+import EditHospedagemModal from "../components/EditHospedagem";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function HospedagensPage() {
     const [hospedagens, setHospedagens] = useState<Hospedagem[]>([]);
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
+    const [quartos, setQuartos] = useState<Quarto[]>([]);
     const [hospedeId, setHospedeId] = useState("");
+    const [quartoId, setQuartoId] = useState("");
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isHospedagemModalOpen, setIsHospedagemModalOpen] = useState(false);
-    const [hospedagemSelecionada, setHospedagemSelecionada] = useState<Hospedagem | null>(null);
     const [maxButtons, setMaxButtons] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const { token } = useAuth();
+    const [expandedRow, setExpandedRow] = useState<number | null>(null);
+    const [hospedagemSelecionada, setHospedagemSelecionada] = useState<Hospedagem | null>(null);
+    const [hospedagemEditSelecionada, setHospedagemEditSelecionada] = useState<Hospedagem | null>(null);
+    const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+    const [edited, setEdited] = useState(false);
+    const [hospedagemRemoveSelecionada, setHospedagemRemoveSelecionada] = useState<number | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const toggleRow = (id: number) => {
+        setExpandedRow(prev => (prev === id ? null : id));
+    };
 
     useEffect(() => {
         const updateMaxButtons = () => {
@@ -63,8 +78,9 @@ export default function HospedagensPage() {
     useEffect(() => {
         carregarHospedagens();
         if (token) {
-            Promise.all([getHospedes(token)]).then(([hospedesRes]) => {
+            Promise.all([getHospedes(token), getQuartos(token)]).then(([hospedesRes, quartosRes]) => {
                 setHospedes(hospedesRes);
+                setQuartos(quartosRes);
             });
         }
     }, [token]);
@@ -74,6 +90,8 @@ export default function HospedagensPage() {
             try {
                 setLoading(true);
                 const data = await getHospedagens(token);
+                console.log(data);
+
                 setHospedagens(data);
             } catch (error) {
                 console.error("Erro ao buscar hospedagens:", error);
@@ -81,6 +99,10 @@ export default function HospedagensPage() {
                 setLoading(false);
             }
         }
+    };
+
+    const removerHospedagem = (id: number) => {
+        deleteHospedagem(token!, id)
     };
 
     if (loading) return <LoadingScreen />;
@@ -138,8 +160,24 @@ export default function HospedagensPage() {
                         </select>
                     </div>
 
-                    {filteredHospedagens.length === 0 ? (
-                        <p className="text-gray-500">Nenhuma hospedagem encontrada.</p>
+                    <div className="mb-4">
+                        <label className="block mb-1 text-sm font-medium">Quarto</label>
+                        <select
+                            value={quartoId}
+                            onChange={(e) => { setQuartoId(e.target.value); setCurrentPage(1); }}
+                            className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
+                        >
+                            <option value="">Todos</option>
+                            {quartos.map((q) => (
+                                <option key={q.id} value={q.id}>
+                                    {q.numero}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {currentHospedagens.length === 0 ? (
+                        <p className="text-6xl text-[var(--navy)]">Nenhuma hospedagem encontrada.</p>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="min-w-full border border-gray-200 rounded-lg">
@@ -153,77 +191,193 @@ export default function HospedagensPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {currentHospedagens.map((hospedagem) => (
-                                        <tr key={hospedagem.id}>
-                                            <td className="px-4 text-center py-2">{hospedagem.quarto.numero}</td>
-                                            <td className="px-4 text-center py-2">{new Date(hospedagem.dataHoraEntrada).toLocaleString("pt-BR")}</td>
-                                            <td className="px-4 text-center py-2">{new Date(hospedagem.dataHoraSaidaPrevista).toLocaleString("pt-BR")}</td>
-                                            <td className="px-4 text-center py-2">
-                                                {hospedagem.dataHoraSaida ? new Date(hospedagem.dataHoraSaida).toLocaleString("pt-BR") : ""}
-                                            </td>
-                                            <td className="px-4 text-center py-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setHospedagemSelecionada(hospedagem);
-                                                        setIsHospedagemModalOpen(true);
-                                                    }}
-                                                    className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--seaBlue)] transition-colors cursor-pointer"
-                                                >
-                                                    Ver detalhes
-                                                </button>
-                                            </td>
-                                        </tr>
+                                    {hospedagens.map((hospedagem) => (
+                                        <>
+                                            <tr key={hospedagem.id}>
+                                                <td className="px-4 text-center py-2">{hospedagem.quarto.numero}</td>
+                                                <td className="px-4 text-center py-2">
+                                                    {new Date(hospedagem.dataHoraEntrada).toLocaleString("pt-BR")}
+                                                </td>
+                                                <td className="px-4 text-center py-2">
+                                                    {new Date(hospedagem.dataHoraSaidaPrevista).toLocaleString("pt-BR")}
+                                                </td>
+                                                <td className="px-4 text-center py-2">
+                                                    {hospedagem.dataHoraSaida
+                                                        ? new Date(hospedagem.dataHoraSaida).toLocaleString("pt-BR")
+                                                        : ""}
+                                                </td>
+                                                <td className="px-4 text-center py-2">
+                                                    <button
+                                                        onClick={() => toggleRow(hospedagem.id)}
+                                                        className="bg-[var(--navy)] text-[var(--sunshine)] px-4 py-2 rounded-lg hover:bg-[var(--seaBlue)] transition-colors cursor-pointer"
+                                                    >
+                                                        {expandedRow === hospedagem.id ? "Ocultar" : "Ver detalhes"}
+                                                    </button>
+                                                </td>
+                                            </tr>
+
+                                            {expandedRow === hospedagem.id && (
+                                                <tr>
+                                                    <td colSpan={5} className="p-4 bg-gray-50">
+
+                                                        <div className="flex justify-between">
+                                                            <h3 className="font-semibold mb-2 text-lg">Detalhes da Hospedagem</h3>
+
+                                                            <div className="flex justify-end gap-4 mb-4">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (typeof hospedagem.id === "number") {
+                                                                            setHospedagemEditSelecionada(hospedagem);
+                                                                        } else {
+                                                                            setHospedagemEditSelecionada(null);
+                                                                        }
+                                                                        setIsEditingModalOpen(true);
+                                                                    }}
+                                                                    className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                >
+                                                                    <MdEdit />
+                                                                </button>
+                                                                {hospedagemEditSelecionada && (
+                                                                    <EditHospedagemModal
+                                                                        isOpen={isEditingModalOpen}
+                                                                        onClose={() => { setIsEditingModalOpen(false), setHospedagemEditSelecionada(null) }}
+                                                                        onSave={(hospedagem) => {
+                                                                            setIsEditingModalOpen(false);
+                                                                            setHospedagens(hospedagens.map((h) => h.id === hospedagem.id ? hospedagem : h));
+                                                                            setHospedagemSelecionada(hospedagem);
+                                                                        }}
+                                                                        hospedagem={hospedagemEditSelecionada}
+                                                                    />
+                                                                )}
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (typeof hospedagem.id === "number") {
+                                                                            setHospedagemRemoveSelecionada(hospedagem.id);
+                                                                        } else {
+                                                                            setHospedagemRemoveSelecionada(null);
+                                                                        }
+                                                                        setModalOpen(true);
+                                                                    }}
+                                                                    className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                >
+                                                                    <MdDelete />
+                                                                </button>
+                                                                <ConfirmModal
+                                                                    isOpen={modalOpen}
+                                                                    onClose={() => setModalOpen(false)}
+                                                                    onConfirm={() => { hospedagemRemoveSelecionada && removerHospedagem(hospedagemRemoveSelecionada); }}
+                                                                    title="Excluir hospedagem"
+                                                                    message="Tem certeza que deseja remover esta hospedagem? Essa ação não poderá ser desfeita."
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex flex-col gap-4">
+                                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
+                                                                <FaPerson className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
+                                                                <div className="flex flex-col">
+                                                                    <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">{hospedagem.hospede.nome}</h2>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
+                                                                <FaCalendarAlt className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
+                                                                <div className="flex flex-col">
+                                                                    <h2>Datas</h2>
+                                                                    <p className="text-gray-600">
+                                                                        Entrada: {new Date(hospedagem.dataHoraEntrada).toLocaleString("pt-BR")}
+                                                                    </p>
+                                                                    <p className="text-gray-600">
+                                                                        Saída prevista: {new Date(hospedagem.dataHoraSaidaPrevista).toLocaleString("pt-BR")}
+                                                                    </p>
+                                                                    {hospedagem.dataHoraSaida && (
+                                                                        <p className="text-gray-600">
+                                                                            Saída: {new Date(hospedagem.dataHoraSaida).toLocaleString("pt-BR")}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
+                                                                <FaMoneyBillWave className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
+                                                                <div className="flex flex-col">
+                                                                    <h2>Valores</h2>
+                                                                    <p className="text-gray-600">
+                                                                        Valor diária: {Number(hospedagem.valorDiaria).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                                                    </p>
+                                                                    <p className="text-gray-600">
+                                                                        Forma de pagamento: {hospedagem.formaPagamento}
+                                                                    </p>
+                                                                    <p className="text-gray-600">
+                                                                        Descontos: {Number(hospedagem.descontos).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                                                    </p>
+                                                                    <p className="text-gray-600">
+                                                                        Acréscimos: {Number(hospedagem.acrescimos).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {hospedagem.Consumo_diario && hospedagem.Consumo_diario.length > 0 ? (
+                                                            <>
+                                                                <h2 className="text-2xl font-bold text-[var(--navy)] mt-4">Consumo Diário</h2>
+                                                                <table className="min-w-full border border-gray-200 rounded-lg mt-4">
+                                                                    <thead className="bg-gray-200">
+                                                                        <tr>
+                                                                            <th className="text-center px-2 py-1">Produto</th>
+                                                                            <th className="text-center px-2 py-1">Valor Unitário</th>
+                                                                            <th className="text-center px-2 py-1">Qtd</th>
+                                                                            <th className="text-center px-2 py-1">Forma Pagamento</th>
+                                                                            <th className="text-center px-2 py-1">Data</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {hospedagem.Consumo_diario.map((c) => (
+                                                                            <tr key={c.id}>
+                                                                                <td className="px-2 py-1 text-center">{c.produto.nome}</td>
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {c.valorUnitario.toLocaleString("pt-BR", {
+                                                                                        style: "currency",
+                                                                                        currency: "BRL",
+                                                                                    })}
+                                                                                </td>
+                                                                                <td className="px-2 py-1 text-center">{c.quantidade}</td>
+                                                                                <td className="px-2 py-1 text-center">{c.formaPagamento}</td>
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {new Date(c.criadoEm).toLocaleString("pt-BR")}
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))}
+
+                                                                        <tr>
+                                                                            <td colSpan={4} className="text-right font-semibold">
+                                                                                Total:
+                                                                            </td>
+                                                                            <td className="text-center font-semibold">
+                                                                                {hospedagem.Consumo_diario
+                                                                                    .reduce(
+                                                                                        (sum, c) => sum + c.valorUnitario * c.quantidade,
+                                                                                        0
+                                                                                    )
+                                                                                    .toLocaleString("pt-BR", {
+                                                                                        style: "currency",
+                                                                                        currency: "BRL",
+                                                                                    })}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </>
+                                                        ) : (
+                                                            null
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </>
                                     ))}
                                 </tbody>
                             </table>
-
-                            {hospedagemSelecionada && (
-                                <HospedagemModal
-                                    isOpen={isHospedagemModalOpen}
-                                    onClose={(edited, deleted, hospedagem) => {
-                                        setIsHospedagemModalOpen(false);
-                                        if (edited)
-                                            setHospedagens([
-                                                ...hospedagens.filter((h) => h.id !== hospedagem.id),
-                                                hospedagem,
-                                            ]);
-                                        if (deleted)
-                                            setHospedagens(hospedagens.filter((h) => h.id !== hospedagem.id));
-                                    }}
-                                    hospedagem={hospedagemSelecionada}
-                                />
-                            )}
-
-                            <div className="flex flex-wrap justify-center items-center gap-2 mt-4">
-                                <button
-                                    disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(prev => prev - 1)}
-                                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 cursor-pointer"
-                                >
-                                    Anterior
-                                </button>
-
-                                {pageNumbers.map(num => (
-                                    <button
-                                        key={num}
-                                        onClick={() => setCurrentPage(num)}
-                                        className={`px-3 py-1 rounded-lg cursor-pointer ${currentPage === num
-                                            ? "bg-[var(--navy)] text-[var(--sunshine)]"
-                                            : "bg-gray-200 hover:bg-gray-300"
-                                            }`}
-                                    >
-                                        {num}
-                                    </button>
-                                ))}
-
-                                <button
-                                    disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(prev => prev + 1)}
-                                    className="px-3 py-1 rounded-lg bg-gray-200 hover:bg-gray-300 disabled:opacity-50 cursor-pointer"
-                                >
-                                    Próxima
-                                </button>
-                            </div>
                         </div>
                     )}
                 </main>

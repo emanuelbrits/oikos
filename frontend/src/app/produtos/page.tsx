@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHospedes, getHospedesByCPF, getHospedesByName, Hospede } from "../services/hospedesService";
 import { useAuth } from "../contexts/AuthContext";
 import { MdAdd } from "react-icons/md";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
-import AddHospedeModal from "../components/AddHospedeModal";
 import LoadingScreen from "../components/loadingScreen";
-import HospedeModal from "../components/hospedeModal";
 import { getProdutos, getProdutosByName, Produto } from "../services/produtosService";
 import AddProdutoModal from "../components/AddProdutoModal";
 import ProdutoModal from "../components/produtoModal";

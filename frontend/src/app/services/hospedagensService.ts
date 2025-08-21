@@ -1,3 +1,4 @@
+import { Consumo_diario } from "./consumosDiario.Service";
 import { Hospede } from "./hospedesService";
 import { Quarto } from "./quartosService";
 
@@ -18,6 +19,7 @@ export interface Hospedagem {
   createdAt: string;
   hospede: Hospede;
   quarto: Quarto;
+  Consumo_diario: Consumo_diario[];
 }
 
 export async function getHospedagens(token: string): Promise<Hospedagem[]> {

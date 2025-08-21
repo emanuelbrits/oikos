@@ -56,11 +56,11 @@ export class HospedagemService {
   }
 
   findAll() {
-    return this.prisma.hospedagem.findMany({ include: { hospede: true, quarto: true } });
+    return this.prisma.hospedagem.findMany({ include: { hospede: true, quarto: true, Consumo_diario: { include: { produto: true } } } });
   }
 
   async findOne(id: number) {
-    const hospedagem = await this.prisma.hospedagem.findUnique({ where: { id }, include: { hospede: true, quarto: true } });
+    const hospedagem = await this.prisma.hospedagem.findUnique({ where: { id }, include: { hospede: true, quarto: true, Consumo_diario: true } });
     if (!hospedagem) throw new NotFoundException('Hospedagem não encontrada');
     return hospedagem;
   }
@@ -70,7 +70,7 @@ export class HospedagemService {
       where: {
         quarto: { numero: numeroQuarto }
       },
-      include: { hospede: true, quarto: true }
+      include: { hospede: true, quarto: true, Consumo_diario: true }
     });
 
     if (hospedagens.length === 0) {
@@ -83,7 +83,7 @@ export class HospedagemService {
   async findByHospede(hospedeId: number) {
     const hospedagens = await this.prisma.hospedagem.findMany({
       where: { hospedeId },
-      include: { hospede: true, quarto: true },
+      include: { hospede: true, quarto: true, Consumo_diario: true },
     });
 
     if (hospedagens.length === 0) {

@@ -37,7 +37,7 @@ export default function Sidebar({ title = "Menu" }: SidebarProps) {
     { label: "Hóspedes", icon: IoIosPerson, href: "/hospedes" },
     { label: "Reservas", icon: LuClock4, href: "/reservas" },
     { label: "Quartos", icon: MdBedroomParent, href: "/quartos" },
-    { label: "Consumos", icon: MdOutlineShoppingCart, href: "/consumo-diario" },
+    { label: "Consumos", icon: MdOutlineShoppingCart, href: "/consumos" },
     { label: "Produtos", icon: LuCupSoda, href: "/produtos" },
     { label: "Sair", icon: FiLogOut, onClick: () => logout() },
   ];

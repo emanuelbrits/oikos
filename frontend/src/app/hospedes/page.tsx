@@ -183,7 +183,7 @@ export default function HospedesPage() {
                     </div>
 
                     {hospedes.length === 0 ? (
-                        <p className="text-gray-500">Nenhum hóspede encontrado.</p>
+                        <p className="text-6xl text-[var(--navy)]">Nenhum hóspede encontrado.</p>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="min-w-full border border-gray-200 rounded-lg">

@@ -122,7 +122,8 @@ export default function EditHospedagemModal({
                 observacoes,
                 hospede: hospedes.find((h) => h.id === hospedeId)!,
                 quarto: quartos.find((q) => q.id === quartoId)!,
-                createdAt: hospedagem.createdAt
+                createdAt: hospedagem.createdAt,
+                Consumo_diario: hospedagem.Consumo_diario
             });
 
         } catch (error) {
