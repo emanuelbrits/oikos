@@ -45,14 +45,21 @@ export default function QuadroReservas({
     Object.fromEntries(allStatuses.map((s) => [s, true]))
   );
 
+  const [hospedeId, setHospedeId] = useState<string>("");
+
   useEffect(() => {
     setReservasState(reservas);
   }, [reservas]);
 
-  const reservasFiltradas = reservasState.filter((res) => statusFilter[res.status ?? ""]);
+  const reservasFiltradas = reservasState.filter((res) => {
+    const statusOk = statusFilter[res.status ?? ""];
+    const hospedeOk = hospedeId ? res.hospede?.id === Number(hospedeId) : true;
+    return statusOk && hospedeOk;
+  });
 
   return (
     <div className="bg-[var(--sunshine)]/10 p-4 rounded-xl shadow flex flex-col max-h-[80vh] min-h-0">
+
       <div className="flex flex-wrap gap-4 mb-4">
         <h2 className="text-[var(--navy)] font-bold text-lg">Exibir:</h2>
         {allStatuses.map((status) => (
@@ -70,6 +77,23 @@ export default function QuadroReservas({
             {status}
           </label>
         ))}
+
+        <select
+          value={hospedeId}
+          onChange={(e) => setHospedeId(e.target.value)}
+          className="border rounded px-2 py-1"
+        >
+          <option value="">Todos os hóspedes</option>
+          {[...new Map(reservasState.map((r) => [r.hospede?.id, r.hospede]))]
+            .filter(([id, h]) => id && h)
+            .sort((a, b) => a[1].nome.localeCompare(b[1].nome))
+            .map(([id, h]) => (
+              <option key={id} value={id}>
+                {h?.nome}
+              </option>
+            ))}
+        </select>
+
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto pr-2">
@@ -135,16 +159,13 @@ export default function QuadroReservas({
           isOpen={isModalOpen}
           reserva={reservaSelecionada}
           onClose={async (isEdited, deleted, reserva) => {
-
             setIsModalOpen(false);
             setReservaSelecionada(null);
 
             if (isEdited) {
               const index = reservasState.findIndex((r) => r.id === reserva?.id);
-
               if (index !== -1) {
                 const updated = [...reservasState];
-
                 updated[index] = { ...updated[index], ...reserva };
                 setReservasState(updated);
               }
@@ -152,9 +173,7 @@ export default function QuadroReservas({
 
             if (deleted) {
               const novas = reservasState.filter((r) => r.id !== reserva?.id);
-
               setReservasState(novas);
-
               if (onReservasChange) {
                 onReservasChange(novas);
               }

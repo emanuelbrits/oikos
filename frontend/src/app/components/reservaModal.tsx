@@ -48,6 +48,19 @@ export default function ReservaModal({ isOpen, onClose, reserva }: ReservaModalP
         });
     }
 
+    const formatCPF = (value: string) => {
+        let v = value.replace(/\D/g, "");
+        if (v.length > 11) v = v.slice(0, 11);
+        if (v.length > 9) {
+            return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
+        } else if (v.length > 6) {
+            return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
+        } else if (v.length > 3) {
+            return `${v.slice(0, 3)}.${v.slice(3)}`;
+        } else {
+            return v;
+        }
+    };
 
     if (!reservaSelecionada) return null;
 
@@ -60,7 +73,7 @@ export default function ReservaModal({ isOpen, onClose, reserva }: ReservaModalP
                 <div>
                     <div className="flex justify-between items-center p-2 bg-[var(--sunshine)]/20 rounded-2xl border-1 border-[var(--navy)]/20">
                         <h2 className="text-2xl text-[var(--navy)] font-semibold mb-2 mr-3 truncate">
-                            Reserva de {reservaSelecionada.hospede.nome}
+                            Reserva de {reservaSelecionada.hospede.nome} - {formatCPF(reservaSelecionada.hospede.cpf)}
                         </h2>
                         <div className="flex justify-between items-center gap-2">
                             <button
