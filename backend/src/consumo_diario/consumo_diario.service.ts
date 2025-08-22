@@ -7,26 +7,57 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ConsumoDiarioService {
   constructor(private prisma: PrismaService) { }
 
-  create(dto: CreateConsumoDiarioDto) {
-    return this.prisma.consumo_diario.create({
-      data: {
-        quantidade: dto.quantidade,
-        valorUnitario: dto.valorUnitario,
-        formaPagamento: dto.formaPagamento,
-        hospedagem: {
-          connect: { id: dto.hospedagemId }
+  async create(dto: CreateConsumoDiarioDto) {
+    try {
+      const consumo_diario = await this.prisma.consumo_diario.create({
+        data: {
+          quantidade: dto.quantidade,
+          valorUnitario: dto.valorUnitario,
+          formaPagamento: dto.formaPagamento,
+          hospedagem: {
+            connect: { id: dto.hospedagemId },
+          },
+          produto: {
+            connect: { id: dto.produtoId },
+          },
         },
-        produto: {
-          connect: { id: dto.produtoId }
-        }
+        include: {
+          produto: true,
+        },
+      });
+      return {
+        success: true,
+        data: consumo_diario,
+      };
+    } catch (error: any) {
+      console.error("Erro ao criar consumo diário:", error);
+
+      let message = "Erro ao salvar o consumo diário.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
       }
-    })
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   findAll() {
     return this.prisma.consumo_diario.findMany({
       include: {
-        hospedagem: true,
+        hospedagem: {
+          include: {
+            quarto: true,
+            hospede: true
+          }
+        },
         produto: true
       }
     })
@@ -63,21 +94,43 @@ export class ConsumoDiarioService {
   }
 
   async update(id: number, dto: UpdateConsumoDiarioDto) {
-    await this.findOne(id);
-    return this.prisma.consumo_diario.update({
-      where: { id },
-      data: {
-        quantidade: dto.quantidade,
-        valorUnitario: dto.valorUnitario,
-        formaPagamento: dto.formaPagamento,
-        hospedagem: {
-          connect: { id: dto.hospedagemId }
-        },
-        produto: {
-          connect: { id: dto.produtoId }
+    try {
+      const consumo = await this.prisma.consumo_diario.update({
+        where: { id },
+        data: {
+          quantidade: dto.quantidade,
+          valorUnitario: dto.valorUnitario,
+          formaPagamento: dto.formaPagamento,
+          hospedagem: {
+            connect: { id: dto.hospedagemId }
+          },
+          produto: {
+            connect: { id: dto.produtoId }
+          }
         }
+      })
+      return {
+        success: true,
+        data: consumo,
+      };
+    } catch (error: any) {
+      console.error("Erro ao atualizar consumo diário:", error);
+
+      let message = "Erro ao salvar o consumo diário.";
+
+      if (error.code === "P2002" && error.meta?.target) {
+        const campos = Array.isArray(error.meta.target)
+          ? error.meta.target.join(", ")
+          : error.meta.target;
+
+        message = `O valor informado para ${campos} já está cadastrado.`;
       }
-    })
+
+      return {
+        success: false,
+        message,
+      };
+    }
   }
 
   async remove(id: number) {

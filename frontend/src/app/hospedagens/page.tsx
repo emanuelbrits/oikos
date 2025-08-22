@@ -9,16 +9,20 @@ import LoadingScreen from "../components/loadingScreen";
 import { deleteHospedagem, getHospedagens, Hospedagem } from "../services/hospedagensService";
 import AddHospedagemModal from "../components/AddHospedagemModal";
 import { getHospedes, Hospede } from "../services/hospedesService";
-import { FaCalendarAlt, FaMoneyBillWave } from "react-icons/fa";
-import { FaPerson } from "react-icons/fa6";
+import { FaCalendarAlt, FaInfo, FaMoneyBillWave, FaSave } from "react-icons/fa";
+import { FaPerson, FaX } from "react-icons/fa6";
 import { getQuartos, Quarto } from "../services/quartosService";
 import EditHospedagemModal from "../components/EditHospedagem";
 import ConfirmModal from "../components/ConfirmModal";
+import React from "react";
+import { getProdutos, Produto } from "../services/produtosService";
+import { createConsumoDiario, deleteConsumoDiario, updateConsumoDiario } from "../services/consumosDiario.Service";
 
 export default function HospedagensPage() {
     const [hospedagens, setHospedagens] = useState<Hospedagem[]>([]);
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
     const [quartos, setQuartos] = useState<Quarto[]>([]);
+    const [produtos, setProdutos] = useState<Produto[]>([]);
     const [hospedeId, setHospedeId] = useState("");
     const [quartoId, setQuartoId] = useState("");
     const [loading, setLoading] = useState(false);
@@ -32,7 +36,35 @@ export default function HospedagensPage() {
     const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
     const [edited, setEdited] = useState(false);
     const [hospedagemRemoveSelecionada, setHospedagemRemoveSelecionada] = useState<number | null>(null);
+    const [consumoRemoveSelecionado, setConsumoRemoveSelecionado] = useState<number | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [novoProdutoId, setNovoProdutoId] = useState<number | null>(null);
+    const [novoValorUnitario, setNovoValorUnitario] = useState("0,00");
+    const [novaQuantidade, setNovaQuantidade] = useState("0");
+    const [novaFormaPagamento, setNovaFormaPagamento] = useState("");
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editedValues, setEditedValues] = useState<any>({});
+
+    const adicionarProduto = async (idHospedagem: number) => {
+        if (!token) return;
+
+        const data = await createConsumoDiario(token, {
+            hospedagemId: idHospedagem,
+            produtoId: novoProdutoId,
+            valorUnitario: parseFloat(novoValorUnitario),
+            quantidade: parseInt(novaQuantidade),
+            formaPagamento: novaFormaPagamento,
+        });
+
+        const novoConsumo = data.data;
+
+        setNovoProdutoId(null);
+        setNovoValorUnitario("0,00");
+        setNovaQuantidade("0");
+        setNovaFormaPagamento("");
+
+        setHospedagens(hospedagens.map((h) => h.id === idHospedagem ? { ...h, Consumo_diario: [...h.Consumo_diario, novoConsumo] } : h));
+    };
 
     const toggleRow = (id: number) => {
         setExpandedRow(prev => (prev === id ? null : id));
@@ -78,9 +110,10 @@ export default function HospedagensPage() {
     useEffect(() => {
         carregarHospedagens();
         if (token) {
-            Promise.all([getHospedes(token), getQuartos(token)]).then(([hospedesRes, quartosRes]) => {
+            Promise.all([getHospedes(token), getQuartos(token), getProdutos(token)]).then(([hospedesRes, quartosRes, produtoRes]) => {
                 setHospedes(hospedesRes);
                 setQuartos(quartosRes);
+                setProdutos(produtoRes);
             });
         }
     }, [token]);
@@ -90,8 +123,6 @@ export default function HospedagensPage() {
             try {
                 setLoading(true);
                 const data = await getHospedagens(token);
-                console.log(data);
-
                 setHospedagens(data);
             } catch (error) {
                 console.error("Erro ao buscar hospedagens:", error);
@@ -105,6 +136,40 @@ export default function HospedagensPage() {
         deleteHospedagem(token!, id)
     };
 
+    const removerConsumo = (id: number) => {
+        deleteConsumoDiario(token!, id)
+        setHospedagens(hospedagens.map((h) => ({
+            ...h,
+            Consumo_diario: h.Consumo_diario.filter(c => c.id !== id)
+        })));
+    };
+
+    const salvarEdicao = async (id: number) => {
+        try {
+            const { id: _id, criadoEm, produto, ...valoresFiltrados } = editedValues;
+
+            await updateConsumoDiario(token!, id, valoresFiltrados);
+
+            setHospedagens(hospedagens.map(h => ({
+                ...h,
+                Consumo_diario: h.Consumo_diario.map(c =>
+                    c.id === id ? { ...c, ...valoresFiltrados, produto: { ...c.produto, ...produtos.find(p => p.id === valoresFiltrados.produtoId) } } : c
+                )
+            })));
+
+            setEditingId(null);
+            setEditedValues({});
+        } catch (error) {
+            console.error("Erro ao salvar edição:", error);
+        }
+    };
+
+
+
+    useEffect(() => {
+        setNovoValorUnitario((produtos.find(p => p.id === novoProdutoId)?.preco || 0).toString());
+    }, [novoProdutoId]);
+
     if (loading) return <LoadingScreen />;
 
     const formatCPF = (value: string) => {
@@ -114,6 +179,13 @@ export default function HospedagensPage() {
         else if (v.length > 6) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
         else if (v.length > 3) return `${v.slice(0, 3)}.${v.slice(3)}`;
         else return v;
+    };
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+        }).format(value);
     };
 
     return (
@@ -192,8 +264,8 @@ export default function HospedagensPage() {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {hospedagens.map((hospedagem) => (
-                                        <>
-                                            <tr key={hospedagem.id}>
+                                        <React.Fragment key={hospedagem.id}>
+                                            <tr>
                                                 <td className="px-4 text-center py-2">{hospedagem.quarto.numero}</td>
                                                 <td className="px-4 text-center py-2">
                                                     {new Date(hospedagem.dataHoraEntrada).toLocaleString("pt-BR")}
@@ -274,6 +346,13 @@ export default function HospedagensPage() {
 
                                                         <div className="flex flex-col gap-4">
                                                             <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
+                                                                <FaInfo className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
+                                                                <div className="flex flex-col">
+                                                                    <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">Hospedagem {hospedagem.id}</h2>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
                                                                 <FaPerson className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
                                                                 <div className="flex flex-col">
                                                                     <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">{hospedagem.hospede.nome}</h2>
@@ -329,41 +408,211 @@ export default function HospedagensPage() {
                                                                             <th className="text-center px-2 py-1">Qtd</th>
                                                                             <th className="text-center px-2 py-1">Forma Pagamento</th>
                                                                             <th className="text-center px-2 py-1">Data</th>
+                                                                            <th className="text-center px-2 py-1">Ações</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
                                                                         {hospedagem.Consumo_diario.map((c) => (
                                                                             <tr key={c.id}>
-                                                                                <td className="px-2 py-1 text-center">{c.produto.nome}</td>
                                                                                 <td className="px-2 py-1 text-center">
-                                                                                    {c.valorUnitario.toLocaleString("pt-BR", {
-                                                                                        style: "currency",
-                                                                                        currency: "BRL",
-                                                                                    })}
+                                                                                    {editingId === c.id ? (
+                                                                                        <select
+                                                                                            value={editedValues.produtoId ?? c.produto.id}
+                                                                                            onChange={(e) =>
+                                                                                                setEditedValues({ ...editedValues, produtoId: Number(e.target.value) })
+                                                                                            }
+                                                                                            className="border px-2 py-1 rounded w-full"
+                                                                                        >
+                                                                                            {produtos.map((p) => (
+                                                                                                <option key={p.id} value={p.id}>
+                                                                                                    {p.nome}
+                                                                                                </option>
+                                                                                            ))}
+                                                                                        </select>
+                                                                                    ) : (
+                                                                                        c.produto.nome
+                                                                                    )}
                                                                                 </td>
-                                                                                <td className="px-2 py-1 text-center">{c.quantidade}</td>
-                                                                                <td className="px-2 py-1 text-center">{c.formaPagamento}</td>
+
                                                                                 <td className="px-2 py-1 text-center">
-                                                                                    {new Date(c.criadoEm).toLocaleString("pt-BR")}
+                                                                                    {editingId === c.id ? (
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            value={editedValues.valorUnitario ?? c.valorUnitario}
+                                                                                            onChange={(e) =>
+                                                                                                setEditedValues({ ...editedValues, valorUnitario: Number(e.target.value) })
+                                                                                            }
+                                                                                            className="border rounded px-2 py-1 w-full"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        c.valorUnitario.toLocaleString("pt-BR", {
+                                                                                            style: "currency",
+                                                                                            currency: "BRL",
+                                                                                        })
+                                                                                    )}
+                                                                                </td>
+
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {editingId === c.id ? (
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            value={editedValues.quantidade ?? c.quantidade}
+                                                                                            onChange={(e) =>
+                                                                                                setEditedValues({ ...editedValues, quantidade: Number(e.target.value) })
+                                                                                            }
+                                                                                            className="border rounded px-2 py-1 w-full"
+                                                                                        />
+                                                                                    ) : (
+                                                                                        c.quantidade
+                                                                                    )}
+                                                                                </td>
+
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {editingId === c.id ? (
+                                                                                        <select
+                                                                                            value={editedValues.formaPagamento ?? c.formaPagamento}
+                                                                                            onChange={(e) =>
+                                                                                                setEditedValues({ ...editedValues, formaPagamento: e.target.value })
+                                                                                            }
+                                                                                            className="border rounded px-2 py-1 w-full"
+                                                                                        >
+                                                                                            <option value="Dinheiro">Dinheiro</option>
+                                                                                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                                                                            <option value="Cartão de Débito">Cartão de Débito</option>
+                                                                                            <option value="Pix">Pix</option>
+                                                                                        </select>
+                                                                                    ) : (
+                                                                                        c.formaPagamento
+                                                                                    )}
+                                                                                </td>
+
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {new Date(new Date(c.criadoEm).getTime() + 3 * 60 * 60 * 1000).toLocaleString("pt-BR")}
+                                                                                </td>
+
+                                                                                <td className="px-2 py-1 text-center flex gap-2 justify-center">
+                                                                                    {editingId === c.id ? (
+                                                                                        <>
+                                                                                            <button
+                                                                                                onClick={() => salvarEdicao(c.id)}
+                                                                                                className="bg-green-500 hover:bg-green-600 text-white py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                                            >
+                                                                                                <FaSave />
+                                                                                            </button>
+                                                                                            <button
+                                                                                                onClick={() => {
+                                                                                                    setEditingId(null);
+                                                                                                    setEditedValues({});
+                                                                                                }}
+                                                                                                className="bg-gray-300 hover:bg-gray-500 text-black py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                                            >
+                                                                                                <FaX />
+                                                                                            </button>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <button
+                                                                                                onClick={() => {
+                                                                                                    setEditingId(c.id);
+                                                                                                    setEditedValues(c);
+                                                                                                }}
+                                                                                                className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                                            >
+                                                                                                <MdEdit />
+                                                                                            </button>
+                                                                                            <button
+                                                                                                onClick={() => {
+                                                                                                    if (typeof c.id === "number") {
+                                                                                                        setConsumoRemoveSelecionado(c.id);
+                                                                                                    } else {
+                                                                                                        setConsumoRemoveSelecionado(null);
+                                                                                                    }
+                                                                                                    setModalOpen(true);
+                                                                                                }}
+                                                                                                className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-3 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                                            >
+                                                                                                <MdDelete />
+                                                                                            </button>
+                                                                                            <ConfirmModal
+                                                                                                isOpen={modalOpen}
+                                                                                                onClose={() => setModalOpen(false)}
+                                                                                                onConfirm={() => { consumoRemoveSelecionado && removerConsumo(consumoRemoveSelecionado); }}
+                                                                                                title="Excluir Consumo"
+                                                                                                message="Tem certeza que deseja remover este consumo? Essa ação não poderá ser desfeita."
+                                                                                            />
+                                                                                        </>
+                                                                                    )}
                                                                                 </td>
                                                                             </tr>
                                                                         ))}
 
                                                                         <tr>
-                                                                            <td colSpan={4} className="text-right font-semibold">
-                                                                                Total:
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <select
+                                                                                    value={novoProdutoId ?? ""}
+                                                                                    onChange={(e) => setNovoProdutoId(e.target.value ? Number(e.target.value) : null)}
+                                                                                    className="border rounded px-2 py-1 w-full"
+                                                                                >
+                                                                                    <option value="">Selecione um produto</option>
+                                                                                    {produtos.map((p) => (
+                                                                                        <option key={p.id} value={p.id}>
+                                                                                            {p.nome}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </select>
                                                                             </td>
-                                                                            <td className="text-center font-semibold">
-                                                                                {hospedagem.Consumo_diario
-                                                                                    .reduce(
-                                                                                        (sum, c) => sum + c.valorUnitario * c.quantidade,
-                                                                                        0
-                                                                                    )
-                                                                                    .toLocaleString("pt-BR", {
-                                                                                        style: "currency",
-                                                                                        currency: "BRL",
-                                                                                    })}
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    step="0.01"
+                                                                                    value={novoValorUnitario}
+                                                                                    onChange={(e) => setNovoValorUnitario(e.target.value)}
+                                                                                    className="border rounded px-2 py-1 w-full text-center"
+                                                                                    placeholder="R$"
+                                                                                />
                                                                             </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    value={novaQuantidade}
+                                                                                    onChange={(e) => setNovaQuantidade(e.target.value)}
+                                                                                    className="border rounded px-2 py-1 w-full text-center"
+                                                                                    placeholder="Qtd"
+                                                                                />
+                                                                            </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <select
+                                                                                    value={novaFormaPagamento}
+                                                                                    onChange={(e) => setNovaFormaPagamento(e.target.value)}
+                                                                                    className="border rounded px-2 py-1 w-full"
+                                                                                >
+                                                                                    <option value="">Forma de Pagamento</option>
+                                                                                    <option value="Dinheiro">Dinheiro</option>
+                                                                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                                                                    <option value="Cartão de Débito">Cartão de Débito</option>
+                                                                                    <option value="Pix">Pix</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <button
+                                                                                    onClick={() => adicionarProduto(hospedagem.id)}
+                                                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 cursor-pointer"
+                                                                                >
+                                                                                    Adicionar
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+
+                                                                        <tr>
+                                                                            <td className="text-center font-semibold">Total:</td>
+                                                                            <td className="text-center font-semibold">{formatCurrency(hospedagem.Consumo_diario
+                                                                                .reduce(
+                                                                                    (sum, c) => sum + c.valorUnitario * c.quantidade,
+                                                                                    0
+                                                                                ))}</td>
+                                                                            <td></td>
+                                                                            <td></td>
+                                                                            <td></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -374,7 +623,7 @@ export default function HospedagensPage() {
                                                     </td>
                                                 </tr>
                                             )}
-                                        </>
+                                        </React.Fragment>
                                     ))}
                                 </tbody>
                             </table>
@@ -385,3 +634,4 @@ export default function HospedagensPage() {
         </ProtectedRoute>
     );
 }
+
