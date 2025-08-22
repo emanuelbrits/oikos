@@ -34,7 +34,6 @@ export async function getReservas(token: string): Promise<Reserva[]> {
   const reservas: Reserva[] = await res.json();
   const agora = dayjs();
 
-  // Atualizar status localmente
   return reservas.map((reserva) => {
     if (
       reserva.status === "Reservado" &&

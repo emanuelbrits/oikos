@@ -98,13 +98,23 @@ export default function HospedagensPage() {
 
     const ITEMS_PER_PAGE = 20;
 
-    const filteredHospedagens = hospedeId === ""
-        ? hospedagens
-        : hospedagens.filter(h => h.hospede.id === Number(hospedeId));
+    const filteredHospedagens = hospedagens.filter((h) => {
+        let ok = true;
 
-    const indexOfLast = currentPage * ITEMS_PER_PAGE;
-    const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
-    const currentHospedagens = filteredHospedagens.slice(indexOfFirst, indexOfLast);
+        if (hospedeId) {
+            ok = ok && h.hospede.id === Number(hospedeId);
+        }
+
+        if (quartoId) {
+            ok = ok && h.quarto.id === Number(quartoId);
+        }
+
+        return ok;
+    });
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentHospedagens = filteredHospedagens.slice(startIndex, endIndex);
 
     const totalPages = Math.ceil(filteredHospedagens.length / ITEMS_PER_PAGE);
 
@@ -154,7 +164,6 @@ export default function HospedagensPage() {
         }
     };
 
-
     const removerHospedagem = (id: number) => {
         deleteHospedagem(token!, id)
     };
@@ -186,8 +195,6 @@ export default function HospedagensPage() {
             console.error("Erro ao salvar edição:", error);
         }
     };
-
-
 
     useEffect(() => {
         setNovoValorUnitario((produtos.find(p => p.id === novoProdutoId)?.preco || 0).toString());
@@ -243,7 +250,11 @@ export default function HospedagensPage() {
                         <label className="block mb-1 text-sm font-medium">Hóspede</label>
                         <select
                             value={hospedeId}
-                            onChange={(e) => { setHospedeId(e.target.value); setCurrentPage(1); }}
+                            onChange={(e) => {
+                                setHospedeId(e.target.value);
+                                setQuartoId("");
+                                setCurrentPage(1);
+                            }}
                             className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
                         >
                             <option value="">Todos</option>
@@ -259,7 +270,11 @@ export default function HospedagensPage() {
                         <label className="block mb-1 text-sm font-medium">Quarto</label>
                         <select
                             value={quartoId}
-                            onChange={(e) => { setQuartoId(e.target.value); setCurrentPage(1); }}
+                            onChange={(e) => {
+                                setQuartoId(e.target.value);
+                                setHospedeId("");
+                                setCurrentPage(1);
+                            }}
                             className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
                         >
                             <option value="">Todos</option>
@@ -286,7 +301,7 @@ export default function HospedagensPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {hospedagens.map((hospedagem) => (
+                                    {currentHospedagens.map((hospedagem) => (
                                         <React.Fragment key={hospedagem.id}>
                                             <tr>
                                                 <td className="px-4 text-center py-2">{hospedagem.quarto.numero}</td>

@@ -40,7 +40,6 @@ export default function QuadroReservas({
     "Finalizado": "bg-gray-500 text-white",
   };
 
-  // Filtros de status (todos começam marcados)
   const allStatuses = Object.keys(statusOrder);
   const [statusFilter, setStatusFilter] = useState<Record<string, boolean>>(
     Object.fromEntries(allStatuses.map((s) => [s, true]))
