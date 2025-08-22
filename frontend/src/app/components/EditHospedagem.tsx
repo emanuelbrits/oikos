@@ -204,12 +204,21 @@ export default function EditHospedagemModal({
                     </div>
                     <div>
                         <label className="block mb-1 text-sm font-medium">Data/Hora Saída</label>
-                        <input
-                            type="datetime-local"
-                            value={dataHoraSaida}
-                            onChange={(e) => setDataHoraSaida(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border border-[var(--navy)]/20"
-                        />
+                        <div className="flex gap-2">
+                            <input
+                                type="datetime-local"
+                                value={dataHoraSaida || ""}
+                                onChange={(e) => setDataHoraSaida(e.target.value)}
+                                className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border border-[var(--navy)]/20"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setDataHoraSaida("")}
+                                className="px-3 py-1 bg-red-500 text-white rounded-lg"
+                            >
+                                Limpar
+                            </button>
+                        </div>
                     </div>
                 </div>
 

@@ -49,6 +49,11 @@ export default function HospedagensPage() {
     const adicionarProduto = async (idHospedagem: number) => {
         if (!token) return;
 
+        if (!novoProdutoId || !novoValorUnitario || !novaQuantidade || !novaFormaPagamento) {
+            alert("Por favor, preencha todos os campos antes de adicionar o produto.");
+            return;
+        }
+
         const data = await createConsumoDiario(token, {
             hospedagemId: idHospedagem,
             produtoId: novoProdutoId,
@@ -64,7 +69,13 @@ export default function HospedagensPage() {
         setNovaQuantidade("0");
         setNovaFormaPagamento("");
 
-        setHospedagens(hospedagens.map((h) => h.id === idHospedagem ? { ...h, Consumo_diario: [...h.Consumo_diario, novoConsumo] } : h));
+        setHospedagens(
+            hospedagens.map((h) =>
+                h.id === idHospedagem
+                    ? { ...h, Consumo_diario: [...h.Consumo_diario, novoConsumo] }
+                    : h
+            )
+        );
     };
 
     const toggleRow = (id: number) => {
@@ -124,7 +135,17 @@ export default function HospedagensPage() {
             try {
                 setLoading(true);
                 const data = await getHospedagens(token);
-                setHospedagens(data);
+
+                const ordenadas = data.sort((a, b) => {
+                    if (!a.dataHoraSaida && b.dataHoraSaida) return -1;
+                    if (a.dataHoraSaida && !b.dataHoraSaida) return 1;
+
+                    const entradaA = new Date(a.dataHoraEntrada).getTime();
+                    const entradaB = new Date(b.dataHoraEntrada).getTime();
+                    return entradaA - entradaB;
+                });
+
+                setHospedagens(ordenadas);
             } catch (error) {
                 console.error("Erro ao buscar hospedagens:", error);
             } finally {
@@ -132,6 +153,7 @@ export default function HospedagensPage() {
             }
         }
     };
+
 
     const removerHospedagem = (id: number) => {
         deleteHospedagem(token!, id)
@@ -722,7 +744,7 @@ export default function HospedagensPage() {
                                                                                         try {
                                                                                             novoConsumo.hospedagemId = hospedagem.id;
 
-                                                                                            await createConsumoDiario(token!, novoConsumo);
+                                                                                            const data = await createConsumoDiario(token!, novoConsumo);
 
                                                                                             setHospedagens(hospedagens.map(h => h.id === hospedagem.id
                                                                                                 ? {
@@ -730,7 +752,7 @@ export default function HospedagensPage() {
                                                                                                     Consumo_diario: [
                                                                                                         ...h.Consumo_diario,
                                                                                                         {
-                                                                                                            id: Date.now(), // ou id retornado pelo backend
+                                                                                                            id: data.data.id,
                                                                                                             criadoEm: new Date().toISOString(),
                                                                                                             produto: produtos.find(p => p.id === novoConsumo.produtoId)!,
                                                                                                             ...novoConsumo,
