@@ -44,6 +44,7 @@ export default function HospedagensPage() {
     const [novaFormaPagamento, setNovaFormaPagamento] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editedValues, setEditedValues] = useState<any>({});
+    const [novoConsumo, setNovoConsumo] = useState<any>({});
 
     const adicionarProduto = async (idHospedagem: number) => {
         if (!token) return;
@@ -618,7 +619,141 @@ export default function HospedagensPage() {
                                                                 </table>
                                                             </>
                                                         ) : (
-                                                            null
+                                                            <>
+                                                                <h2 className="text-2xl font-bold text-[var(--navy)] mt-4 mb-2">Adicionar Consumo Diário</h2>
+                                                                <tbody>
+                                                                    {hospedagem.Consumo_diario.length > 0 ? (
+                                                                        hospedagem.Consumo_diario.map((c) => (
+                                                                            <tr key={c.id}>
+                                                                                <td className="px-2 py-1 text-center">{c.produto.nome}</td>
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {c.valorUnitario.toLocaleString("pt-BR", {
+                                                                                        style: "currency",
+                                                                                        currency: "BRL",
+                                                                                    })}
+                                                                                </td>
+                                                                                <td className="px-2 py-1 text-center">{c.quantidade}</td>
+                                                                                <td className="px-2 py-1 text-center">{c.formaPagamento}</td>
+                                                                                <td className="px-2 py-1 text-center">
+                                                                                    {new Date(new Date(c.criadoEm).getTime() + 3 * 60 * 60 * 1000).toLocaleString("pt-BR")}
+                                                                                </td>
+                                                                                <td className="px-2 py-1 text-center flex gap-2 justify-center">
+                                                                                    <button
+                                                                                        onClick={() => {
+                                                                                            if (typeof c.id === "number") {
+                                                                                                setConsumoRemoveSelecionado(c.id);
+                                                                                            } else {
+                                                                                                setConsumoRemoveSelecionado(null);
+                                                                                            }
+                                                                                            setModalOpen(true);
+                                                                                        }}
+                                                                                        className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] py-2 px-2 rounded-lg transition-colors cursor-pointer"
+                                                                                    >
+                                                                                        <MdDelete />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() => {
+                                                                                            setEditingId(c.id);
+                                                                                            setEditedValues(c);
+                                                                                        }}
+                                                                                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-2 rounded-lg transition-colors cursor-pointer"
+                                                                                    >
+                                                                                        <MdEdit />
+                                                                                    </button>
+                                                                                </td>
+                                                                            </tr>
+                                                                        ))
+                                                                    ) : (
+                                                                        <tr>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <select
+                                                                                    value={novoConsumo.produtoId || ""}
+                                                                                    onChange={(e) => {
+                                                                                        const produtoId = Number(e.target.value);
+                                                                                        const produtoSelecionado = produtos.find(p => p.id === produtoId);
+                                                                                        setNovoConsumo({
+                                                                                            ...novoConsumo,
+                                                                                            produtoId,
+                                                                                            valorUnitario: produtoSelecionado ? produtoSelecionado.preco : 0
+                                                                                        });
+                                                                                    }}
+                                                                                    className="border rounded px-2 py-1"
+                                                                                >
+                                                                                    <option value="">Selecione um produto</option>
+                                                                                    {produtos.map((p) => (
+                                                                                        <option key={p.id} value={p.id}>
+                                                                                            {p.nome}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </select>
+                                                                            </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    placeholder="Valor Unitário"
+                                                                                    value={novoConsumo.valorUnitario || 0}
+                                                                                    onChange={(e) => setNovoConsumo({ ...novoConsumo, valorUnitario: Number(e.target.value) })}
+                                                                                    className="border rounded px-2 py-1 text-center" />
+                                                                            </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <input
+                                                                                    type="number"
+                                                                                    placeholder="Quantidade"
+                                                                                    value={novoConsumo.quantidade || 0}
+                                                                                    onChange={(e) => setNovoConsumo({ ...novoConsumo, quantidade: Number(e.target.value) })}
+                                                                                    className="border rounded px-2 py-1 text-center" />
+                                                                            </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <select
+                                                                                    value={novoConsumo.formaPagamento || ""}
+                                                                                    onChange={(e) => setNovoConsumo({ ...novoConsumo, formaPagamento: e.target.value })}
+                                                                                    className="border rounded px-2 py-1"
+                                                                                >
+                                                                                    <option value="">Selecione</option>
+                                                                                    <option value="Dinheiro">Dinheiro</option>
+                                                                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                                                                    <option value="Cartão de Débito">Cartão de Débito</option>
+                                                                                    <option value="Pix">Pix</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td className="px-2 py-1 text-center">
+                                                                                <button
+                                                                                    onClick={async () => {
+                                                                                        try {
+                                                                                            novoConsumo.hospedagemId = hospedagem.id;
+
+                                                                                            await createConsumoDiario(token!, novoConsumo);
+
+                                                                                            setHospedagens(hospedagens.map(h => h.id === hospedagem.id
+                                                                                                ? {
+                                                                                                    ...h,
+                                                                                                    Consumo_diario: [
+                                                                                                        ...h.Consumo_diario,
+                                                                                                        {
+                                                                                                            id: Date.now(), // ou id retornado pelo backend
+                                                                                                            criadoEm: new Date().toISOString(),
+                                                                                                            produto: produtos.find(p => p.id === novoConsumo.produtoId)!,
+                                                                                                            ...novoConsumo,
+                                                                                                        },
+                                                                                                    ],
+                                                                                                }
+                                                                                                : h
+                                                                                            ));
+
+                                                                                            setNovoConsumo({});
+                                                                                        } catch (error) {
+                                                                                            console.error("Erro ao adicionar consumo:", error);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-lg transition-colors cursor-pointer"
+                                                                                >
+                                                                                    Adicionar
+                                                                                </button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    )}
+                                                                </tbody>
+                                                            </>
                                                         )}
                                                     </td>
                                                 </tr>
@@ -634,4 +769,3 @@ export default function HospedagensPage() {
         </ProtectedRoute>
     );
 }
-
