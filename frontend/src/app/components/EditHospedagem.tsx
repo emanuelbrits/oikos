@@ -214,7 +214,7 @@ export default function EditHospedagemModal({
                             <button
                                 type="button"
                                 onClick={() => setDataHoraSaida("")}
-                                className="px-3 py-1 bg-red-500 text-white rounded-lg"
+                                className="px-3 py-1 bg-red-500 text-white rounded-lg cursor-pointer"
                             >
                                 Limpar
                             </button>
