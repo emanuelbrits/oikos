@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import "dayjs/locale/pt-br";
-import { getReservas, Reserva } from "../services/reservasService";
+import { Reserva } from "../services/reservasService";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ReservaModal from "./reservaModal";
 

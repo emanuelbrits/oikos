@@ -72,7 +72,7 @@ export default function HospedagensPage() {
         setHospedagens(
             hospedagens.map((h) =>
                 h.id === idHospedagem
-                    ? { ...h, Consumo_diario: [...h.Consumo_diario, novoConsumo] }
+                    ? { ...h, acrescimos: h.acrescimos + (parseFloat(novoValorUnitario) * parseInt(novaQuantidade)), Consumo_diario: [...h.Consumo_diario, novoConsumo] }
                     : h
             )
         );
@@ -172,7 +172,8 @@ export default function HospedagensPage() {
         deleteConsumoDiario(token!, id)
         setHospedagens(hospedagens.map((h) => ({
             ...h,
-            Consumo_diario: h.Consumo_diario.filter(c => c.id !== id)
+            Consumo_diario: h.Consumo_diario.filter(c => c.id !== id),
+            acrescimos: h.acrescimos - (h.Consumo_diario.find(c => c.id === id)?.valorUnitario || 0)
         })));
     };
 

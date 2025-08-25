@@ -9,25 +9,48 @@ export class ConsumoDiarioService {
 
   async create(dto: CreateConsumoDiarioDto) {
     try {
-      const consumo_diario = await this.prisma.consumo_diario.create({
-        data: {
-          quantidade: dto.quantidade,
-          valorUnitario: dto.valorUnitario,
-          formaPagamento: dto.formaPagamento,
-          hospedagem: {
-            connect: { id: dto.hospedagemId },
+      const result = await this.prisma.$transaction(async (prisma) => {
+        const consumo_diario = await prisma.consumo_diario.create({
+          data: {
+            quantidade: dto.quantidade,
+            valorUnitario: dto.valorUnitario,
+            formaPagamento: dto.formaPagamento,
+            hospedagem: {
+              connect: { id: dto.hospedagemId },
+            },
+            produto: {
+              connect: { id: dto.produtoId },
+            },
           },
-          produto: {
-            connect: { id: dto.produtoId },
+          include: {
+            produto: true,
           },
-        },
-        include: {
-          produto: true,
-        },
+        });
+
+        await prisma.produto.update({
+          where: { id: dto.produtoId },
+          data: {
+            quantidade: {
+              decrement: dto.quantidade,
+            },
+          },
+        });
+
+        await prisma.hospedagem.update({
+          where: { id: dto.hospedagemId },
+          data: {
+            acrescimos: {
+              increment: dto.quantidade * dto.valorUnitario,
+            },
+          },
+        });
+
+        return consumo_diario;
       });
+
       return {
         success: true,
-        data: consumo_diario,
+        data: result,
       };
     } catch (error: any) {
       console.error("Erro ao criar consumo diário:", error);
@@ -48,6 +71,7 @@ export class ConsumoDiarioService {
       };
     }
   }
+
 
   findAll() {
     return this.prisma.consumo_diario.findMany({
