@@ -36,7 +36,14 @@ export async function getReservas(token: string): Promise<Reserva[]> {
 
   return reservas.map((reserva) => {
     if (
-      reserva.status === "Reservado" &&
+      reserva.status === "Reservado"  &&
+      dayjs(reserva.dataHoraInicial).isBefore(agora)
+    ) {
+      return { ...reserva, status: "Expirado" };
+    }
+
+    if (
+      reserva.status === "Na fila"  &&
       dayjs(reserva.dataHoraInicial).isBefore(agora)
     ) {
       return { ...reserva, status: "Expirado" };

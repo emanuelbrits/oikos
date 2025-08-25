@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import "dayjs/locale/pt-br";
-import { getReservas, Reserva } from "../services/reservasService";
+import { Reserva } from "../services/reservasService";
 import ReservaModal from "./reservaModal";
 
 dayjs.extend(isBetween);
@@ -21,7 +21,6 @@ export default function QuadroReservas({
 }: QuadroReservasProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservaSelecionada, setReservaSelecionada] = useState<Reserva | null>(null);
-
   const [reservasState, setReservasState] = useState<Reserva[]>(reservas);
 
   const statusOrder: Record<string, number> = {
@@ -44,8 +43,8 @@ export default function QuadroReservas({
   const [statusFilter, setStatusFilter] = useState<Record<string, boolean>>(
     Object.fromEntries(allStatuses.map((s) => [s, true]))
   );
-
   const [hospedeId, setHospedeId] = useState<string>("");
+  const [sortOption, setSortOption] = useState<string>("entrada"); // nova opção de ordenação
 
   useEffect(() => {
     setReservasState(reservas);
@@ -56,6 +55,28 @@ export default function QuadroReservas({
     const hospedeOk = hospedeId ? res.hospede?.id === Number(hospedeId) : true;
     return statusOk && hospedeOk;
   });
+
+  const ordenarReservas = (a: Reserva, b: Reserva) => {
+    if (sortOption === "entradaAntigas") {
+      return dayjs(a.dataHoraInicial).valueOf() - dayjs(b.dataHoraInicial).valueOf();
+    }
+    if (sortOption === "saidaAntigas") {
+      return dayjs(a.dataHoraFinal).valueOf() - dayjs(b.dataHoraFinal).valueOf();
+    }
+    if (sortOption === "status") {
+      const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 99;
+      const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 99;
+      return statusA - statusB;
+    }
+    if (sortOption === "entradaRecentes") {
+      return dayjs(b.dataHoraInicial).valueOf() - dayjs(a.dataHoraInicial).valueOf();
+    }
+    if (sortOption === "entradaRecentes") {
+      return dayjs(b.dataHoraFinal).valueOf() - dayjs(a.dataHoraFinal).valueOf();
+    }
+    return 0;
+  };
+
 
   return (
     <div className="bg-[var(--sunshine)]/10 p-4 rounded-xl shadow flex flex-col max-h-[80vh] min-h-0">
@@ -94,28 +115,20 @@ export default function QuadroReservas({
             ))}
         </select>
 
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+          className="border rounded px-2 py-1"
+        >
+          <option value="entradaAntigas">Ordenar por entradas mais antigas</option>
+          <option value="entradaRecentes">Ordenar por entradas mais recentes</option>
+          <option value="status">Ordenar por status</option>
+        </select>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto pr-2">
         {[...reservasFiltradas]
-          .sort((a, b) => {
-            if (a.status === "Na fila" && b.status === "Na fila") {
-              return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-            }
-
-            const startA = dayjs(a.dataHoraInicial).valueOf();
-            const startB = dayjs(b.dataHoraInicial).valueOf();
-            if (startA !== startB) return startA - startB;
-
-            const endA = dayjs(a.dataHoraFinal).valueOf();
-            const endB = dayjs(b.dataHoraFinal).valueOf();
-
-            const statusA = statusOrder[a.status as keyof typeof statusOrder] ?? 99;
-            const statusB = statusOrder[b.status as keyof typeof statusOrder] ?? 99;
-            if (statusA !== statusB) return statusA - statusB;
-
-            return endA - endB;
-          })
+          .sort(ordenarReservas)
           .map((res) => {
             const statusClass =
               statusColors[res.status ?? ""] ?? "bg-[var(--navy)] text-[var(--sunshine)]";
