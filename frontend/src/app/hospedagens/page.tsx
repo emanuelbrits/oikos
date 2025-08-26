@@ -187,7 +187,8 @@ export default function HospedagensPage() {
                 ...h,
                 Consumo_diario: h.Consumo_diario.map(c =>
                     c.id === id ? { ...c, ...valoresFiltrados, produto: { ...c.produto, ...produtos.find(p => p.id === valoresFiltrados.produtoId) } } : c
-                )
+                ),
+                acrescimos: h.Consumo_diario.reduce((total, c) => total + (c.id === id ? (valoresFiltrados.valorUnitario || c.valorUnitario) * (valoresFiltrados.quantidade || c.quantidade) : c.valorUnitario * c.quantidade), 0)
             })));
 
             setEditingId(null);
@@ -766,6 +767,7 @@ export default function HospedagensPage() {
                                                                                                 setHospedagens(hospedagens.map(h => h.id === hospedagem.id
                                                                                                     ? {
                                                                                                         ...h,
+                                                                                                        acrescimos: h.acrescimos + (parseFloat(novoConsumo.valorUnitario) * parseInt(novoConsumo.quantidade)),
                                                                                                         Consumo_diario: [
                                                                                                             ...h.Consumo_diario,
                                                                                                             {
