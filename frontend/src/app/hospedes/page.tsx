@@ -68,20 +68,44 @@ export default function HospedesPage() {
         carregarHospedes()
     }, [token]);
 
-    const buscarPorNome = () => {
+    const buscarPorNome = async () => {
         setBuscaCPF("");
-        carregarHospedes();
-        if (!buscaNome.trim() || !token) return;
-        getHospedesByName(token, buscaNome).then(setHospedes);
-        setCurrentPage(1);
+        if (!buscaNome.trim() || !token) {
+            // Se não digitou nada, carrega todos
+            await carregarHospedes();
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const resultados = await getHospedesByName(token, buscaNome);
+            setHospedes(resultados);
+            setCurrentPage(1);
+        } catch (error) {
+            console.error("Erro na busca por nome:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const buscarPorCPF = () => {
+    const buscarPorCPF = async () => {
         setBuscaNome("");
-        carregarHospedes();
-        if (!buscaCPF.trim() || !token) return;
-        getHospedesByCPF(token, buscaCPF.replace(/\D/g, "")).then(setHospedes);
-        setCurrentPage(1);
+        const cpfLimpo = buscaCPF.replace(/\D/g, "");
+        if (!cpfLimpo || !token) {
+            await carregarHospedes();
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const resultados = await getHospedesByCPF(token, cpfLimpo);
+            setHospedes(resultados);
+            setCurrentPage(1);
+        } catch (error) {
+            console.error("Erro na busca por CPF:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const carregarHospedes = async () => {
