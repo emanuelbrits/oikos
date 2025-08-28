@@ -296,6 +296,7 @@ export default function HospedagensPage() {
                                 <thead className="bg-[var(--navy)] text-[var(--sunshine)]">
                                     <tr>
                                         <th className="text-center px-4 py-2">Quarto</th>
+                                        <th className="text-center px-4 py-2">Hóspede</th>
                                         <th className="text-center px-4 py-2">Data Entrada</th>
                                         <th className="text-center px-4 py-2">Data Saída prevista</th>
                                         <th className="text-center px-4 py-2">Data Saída</th>
@@ -307,6 +308,7 @@ export default function HospedagensPage() {
                                         <React.Fragment key={hospedagem.id}>
                                             <tr>
                                                 <td className="px-4 text-center py-2">{hospedagem.quarto.numero}</td>
+                                                <td className="px-4 text-center py-2">{hospedagem.hospede.nome}</td>
                                                 <td className="px-4 text-center py-2">
                                                     {new Date(hospedagem.dataHoraEntrada).toLocaleString("pt-BR")}
                                                 </td>
