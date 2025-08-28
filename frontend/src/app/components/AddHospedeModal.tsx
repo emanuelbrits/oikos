@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { createHospede } from "../services/hospedesService";
+import { createHospede, Hospede } from "../services/hospedesService";
 import { useAuth } from "../contexts/AuthContext";
 
 interface AddHospedeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: () => void;
+    onSave: (novoHospede: Hospede) => void;
 }
 
 export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeModalProps) {
@@ -67,12 +67,14 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
                 complemento: complemento.toUpperCase(),
             });
 
+            const novoHospede = response.data;
+
             if (!response.success) {
                 setErrorMsg(response.message);
                 return;
             }
 
-            onSave();
+            onSave(novoHospede);
         } catch (error) {
             console.error("Erro ao salvar hóspede:", error);
             setErrorMsg("Ocorreu um erro inesperado. Tente novamente.");

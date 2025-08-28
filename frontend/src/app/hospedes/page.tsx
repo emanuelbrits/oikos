@@ -9,18 +9,25 @@ import Sidebar from "../components/Sidebar";
 import AddHospedeModal from "../components/AddHospedeModal";
 import LoadingScreen from "../components/loadingScreen";
 import HospedeModal from "../components/hospedeModal";
+import HospedeSaveModal from "../components/hospedeSaveModal";
+import { useRouter } from "next/navigation";
+import AddHospedagemModal from "../components/AddHospedagemModal";
 
 export default function HospedesPage() {
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isHospedeModalOpen, setIsHospedeModalOpen] = useState(false);
+    const [isHospedeSaveModalOpen, setIsHospedeSaveModalOpen] = useState(false);
+    const [isAddHospedagemModalOpen, setIsAddHospedagemModalOpen] = useState(false);
     const [hospedeSelecionado, setHospedeSelecionado] = useState<Hospede | null>(null);
+    const [hospedeCriado, setHospedeCriado] = useState<Hospede | null>(null);
     const [buscaNome, setBuscaNome] = useState("");
     const [buscaCPF, setBuscaCPF] = useState("");
     const [maxButtons, setMaxButtons] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const { token } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         const updateMaxButtons = () => {
@@ -174,11 +181,33 @@ export default function HospedesPage() {
                         <AddHospedeModal
                             isOpen={isAddModalOpen}
                             onClose={() => { setIsAddModalOpen(false); }}
-                            onSave={() => {
+                            onSave={(novoHospede) => {
+
+                                setHospedeCriado(novoHospede);
+                                setIsHospedeSaveModalOpen(true);
                                 setIsAddModalOpen(false);
                                 carregarHospedes();
                             }}
                         />
+
+                        <HospedeSaveModal
+                            isOpen={isHospedeSaveModalOpen}
+                            onClose={() => { setIsHospedeSaveModalOpen(false); }}
+                            onOpenHospedagem={() => { setIsAddHospedagemModalOpen(true) }}
+                            onOpenReserva={() => { router.push(`/reservas?hospedeId=${hospedeCriado?.id}`) }}
+                        />
+
+                        {isAddHospedagemModalOpen && (
+                            <AddHospedagemModal
+                                isOpen={isAddHospedagemModalOpen}
+                                onClose={() => setIsAddHospedagemModalOpen(false)}
+                                onSave={() => {
+                                    setIsAddHospedagemModalOpen(false);
+                                    router.push('/hospedagens');
+                                }}
+                                initialHospedeId={hospedeCriado?.id}
+                            />
+                        )}
 
                     </div>
 
