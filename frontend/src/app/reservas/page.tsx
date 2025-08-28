@@ -29,6 +29,15 @@ export default function ReservasPage() {
     const [saida, setSaida] = useState<string>("");
     const [observacao, setObservacao] = useState<string>("");
 
+    const [searchHospede, setSearchHospede] = useState("");
+    const [showSugestoes, setShowSugestoes] = useState(false);
+
+    const norm = (s: string) =>
+        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    const matches = hospedes.filter(h => norm(h.nome).includes(norm(searchHospede)));
+
+    // --- Carregar dados iniciais ---
     useEffect(() => {
         if (!token) return;
         setLoading(true);
@@ -39,6 +48,18 @@ export default function ReservasPage() {
                 setQuartos(quartosRes);
                 setReservas(reservasRes);
                 setHospedes(hospedesRes);
+
+                // --- Preencher hóspede se houver hospedeId na URL ---
+                const searchParams = new URLSearchParams(window.location.search);
+                const hospedeIdUrl = searchParams.get("hospedeId");
+                if (hospedeIdUrl) {
+                    const id = parseInt(hospedeIdUrl, 10);
+                    const hospedeSelecionado = hospedesRes.find(h => h.id === id);
+                    if (hospedeSelecionado) {
+                        setHospedeId(id);
+                        setSearchHospede(`${hospedeSelecionado.nome} - ${formatCPF(hospedeSelecionado.cpf)}`);
+                    }
+                }
             })
             .catch(() => setErro("Erro ao carregar dados."))
             .finally(() => setLoading(false));
@@ -47,15 +68,10 @@ export default function ReservasPage() {
     const formatCPF = (value: string) => {
         let v = value.replace(/\D/g, "");
         if (v.length > 11) v = v.slice(0, 11);
-        if (v.length > 9) {
-            return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
-        } else if (v.length > 6) {
-            return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
-        } else if (v.length > 3) {
-            return `${v.slice(0, 3)}.${v.slice(3)}`;
-        } else {
-            return v;
-        }
+        if (v.length > 9) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
+        else if (v.length > 6) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
+        else if (v.length > 3) return `${v.slice(0, 3)}.${v.slice(3)}`;
+        else return v;
     };
 
     if (loading) return <LoadingScreen />;
@@ -64,17 +80,16 @@ export default function ReservasPage() {
         <ProtectedRoute>
             <div className="flex min-h-screen bg-[var(--sunshine)]">
                 <Sidebar />
-
                 <main className="flex-1 p-4 md:p-6 flex gap-4">
                     <div className="flex-[0.4] flex flex-col gap-6">
+                        {/* QUARTOS */}
                         <div className="bg-white p-6 rounded-xl shadow">
                             <h2 className="font-semibold mb-4 text-lg">Quartos</h2>
                             <ul className="grid grid-cols-5 gap-2">
                                 {quartos.map((q) => (
                                     <li
                                         key={q.id}
-                                        className={`flex items-center justify-center h-10 border border-gray-200 cursor-pointer rounded-lg hover:bg-gray-100 ${q.id === quartoSelecionado ? "bg-gray-200 font-bold" : ""
-                                            }`}
+                                        className={`flex items-center justify-center h-10 border border-gray-200 cursor-pointer rounded-lg hover:bg-gray-100 ${q.id === quartoSelecionado ? "bg-gray-200 font-bold" : ""}`}
                                         onClick={() =>
                                             setQuartoSelecionado(q.id === quartoSelecionado ? null : (q.id ?? null))
                                         }
@@ -85,6 +100,7 @@ export default function ReservasPage() {
                             </ul>
                         </div>
 
+                        {/* NOVA RESERVA */}
                         <div className="bg-white p-6 rounded-xl shadow flex-1">
                             <h2 className="font-semibold mb-4 text-lg">Nova Reserva</h2>
                             <form
@@ -102,16 +118,13 @@ export default function ReservasPage() {
 
                                     const conflito = reservasDoQuarto.some(reserva => {
                                         if (reserva.status !== "Reservado") return false;
-
                                         const inicioExistente = new Date(reserva.dataHoraInicial);
                                         const fimExistente = new Date(reserva.dataHoraFinal);
                                         const novaEntrada = new Date(entrada);
                                         const novaSaida = new Date(saida);
 
                                         const entradaConflito = novaEntrada >= inicioExistente && novaEntrada < fimExistente;
-
                                         const saidaConflito = novaSaida > inicioExistente && novaSaida <= fimExistente;
-
                                         const envolveConflito = novaEntrada <= inicioExistente && novaSaida >= fimExistente;
 
                                         return entradaConflito || saidaConflito || envolveConflito;
@@ -133,27 +146,46 @@ export default function ReservasPage() {
                                     setReservas(reservasAtualizadas);
 
                                     setHospedeId(null);
+                                    setSearchHospede("");
                                     setEntrada("");
                                     setSaida("");
                                     setObservacao("");
                                 }}
                             >
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Hóspede</label>
-                                        <select
-                                            value={hospedeId ?? ""}
-                                            onChange={(e) => setHospedeId(Number(e.target.value))}
+                                        <label className="block mb-1 text-sm font-medium">Hóspede</label>
+                                        <input
+                                            type="text"
+                                            value={searchHospede}
+                                            onChange={(e) => {
+                                                setSearchHospede(e.target.value);
+                                                setHospedeId(null);
+                                                setShowSugestoes(true);
+                                            }}
+                                            onFocus={() => setShowSugestoes(true)}
+                                            onBlur={() => setTimeout(() => setShowSugestoes(false), 120)}
+                                            placeholder="Digite o nome do hóspede"
+                                            autoComplete="off"
                                             className="w-full p-3 border rounded-lg"
-                                            disabled={!quartoSelecionado}
-                                        >
-                                            <option value="">Selecione</option>
-                                            {hospedes.map((h) => (
-                                                <option key={h.id} value={h.id}>
-                                                    {h.nome} - {formatCPF(h.cpf)}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        />
+                                        {showSugestoes && searchHospede.trim() !== "" && matches.length > 0 && (
+                                            <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-[var(--navy)]/20 rounded-md shadow">
+                                                {matches.slice(0, 12).map((h) => (
+                                                    <li
+                                                        key={h.id}
+                                                        onMouseDown={() => {
+                                                            setHospedeId(h.id!);
+                                                            setSearchHospede(`${h.nome} - ${formatCPF(h.cpf)}`);
+                                                            setShowSugestoes(false);
+                                                        }}
+                                                        className="px-3 py-2 cursor-pointer hover:bg-[var(--sunshine)]/30"
+                                                    >
+                                                        {h.nome} - {formatCPF(h.cpf)}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </div>
 
                                     <div>
@@ -165,9 +197,7 @@ export default function ReservasPage() {
                                             disabled={!quartoSelecionado}
                                         >
                                             {["Cartão de Crédito", "Cartão de Débito", "Pix"].map((fp) => (
-                                                <option key={fp} value={fp}>
-                                                    {fp}
-                                                </option>
+                                                <option key={fp} value={fp}>{fp}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -211,19 +241,17 @@ export default function ReservasPage() {
 
                                 <button
                                     type="submit"
-                                    className={`w-full py-3 rounded-lg font-semibold text-white cursor-pointer ${quartoSelecionado ? "bg-[var(--navy)] hover:bg-[var(--seaBlue)] transition-colors duration-300" : "bg-gray-300 cursor-not-allowed"
-                                        }`}
+                                    className={`w-full py-3 rounded-lg font-semibold text-white cursor-pointer ${quartoSelecionado ? "bg-[var(--navy)] hover:bg-[var(--seaBlue)] transition-colors duration-300" : "bg-gray-300 cursor-not-allowed"}`}
                                     disabled={!quartoSelecionado}
                                 >
                                     Reservar
                                 </button>
                             </form>
                         </div>
-
                     </div>
 
-
-                    {calendarVisible ?
+                    {/* CALENDÁRIO / QUADRO */}
+                    {calendarVisible ? (
                         <div className="flex-[0.6] bg-white rounded-xl shadow h-full p-4 flex flex-col">
                             <div className="flex justify-end mb-4">
                                 <button
@@ -233,7 +261,6 @@ export default function ReservasPage() {
                                     Ver em Quadro
                                 </button>
                             </div>
-
                             <div className="flex-1 min-h-0">
                                 {quartoSelecionado ? (
                                     <CalendarioReservas
@@ -250,7 +277,7 @@ export default function ReservasPage() {
                                 )}
                             </div>
                         </div>
-                        :
+                    ) : (
                         <div className="flex-[0.6] bg-white rounded-xl shadow min-h-0 p-4 flex flex-col">
                             <div className="flex justify-end mb-4">
                                 <button
@@ -276,8 +303,7 @@ export default function ReservasPage() {
                                 )}
                             </div>
                         </div>
-                    }
-
+                    )}
                 </main>
             </div>
         </ProtectedRoute>

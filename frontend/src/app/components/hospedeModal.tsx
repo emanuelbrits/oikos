@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import ConfirmModal from "./ConfirmModal";
@@ -6,6 +8,8 @@ import EditHospedeModal from "./EditHospedeModal";
 import { FaInfo } from "react-icons/fa";
 import { FaMapLocationDot } from "react-icons/fa6";
 import { deleteHospede } from "../services/hospedesService";
+import AddHospedagemModal from "./AddHospedagemModal";
+import { useRouter } from "next/navigation";
 
 export interface Hospede {
     id?: number;
@@ -39,6 +43,8 @@ export default function HospedeModal({ isOpen, onClose, hospede }: HospedeModalP
     const [modalOpen, setModalOpen] = useState(false);
     const [edited, setEdited] = useState(false);
     const [deleted] = useState(false);
+    const router = useRouter();
+    const [isAddHospedagemModalOpen, setIsAddHospedagemModalOpen] = useState(false);
 
     useEffect(() => {
         setHospedeSelecionado(hospede);
@@ -140,7 +146,7 @@ export default function HospedeModal({ isOpen, onClose, hospede }: HospedeModalP
                             <ConfirmModal
                                 isOpen={modalOpen}
                                 onClose={() => setModalOpen(false)}
-                                onConfirm={() => {hospedeRemoveSelecionado && removerHospede(hospedeRemoveSelecionado); onClose(edited, true, hospedeSelecionado); }}
+                                onConfirm={() => { hospedeRemoveSelecionado && removerHospede(hospedeRemoveSelecionado); onClose(edited, true, hospedeSelecionado); }}
                                 title="Excluir hóspede"
                                 message="Tem certeza que deseja remover este hóspede? Essa ação não poderá ser desfeita."
                             />
@@ -171,6 +177,32 @@ export default function HospedeModal({ isOpen, onClose, hospede }: HospedeModalP
                             </div>
                         </div>
                     </div>
+                    <div className="flex flex-col md:flex-row gap-2 mt-4 justify-center">
+                        <button
+                            onClick={() => setIsAddHospedagemModalOpen(true)}
+                            className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                        >
+                            Criar Hospedagem
+                        </button>
+
+                        <button
+                            onClick={() => router.push(`/reservas?hospedeId=${hospedeSelecionado?.id}`)}
+                            className="bg-[var(--sunshine)]/60 hover:bg-[var(--sunshine)] text-[var(--navy)] px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                        >
+                            Criar Reserva
+                        </button>
+                    </div>
+                    {isAddHospedagemModalOpen && (
+                        <AddHospedagemModal
+                            isOpen={isAddHospedagemModalOpen}
+                            onClose={() => setIsAddHospedagemModalOpen(false)}
+                            onSave={() => {
+                                setIsAddHospedagemModalOpen(false);
+                                router.push('/hospedagens');
+                            }}
+                            initialHospedeId={hospedeSelecionado?.id}
+                        />
+                    )}
                     <div
                         onClick={() => onClose(edited, deleted, hospedeSelecionado)}
                         className="flex mt-2 justify-center">

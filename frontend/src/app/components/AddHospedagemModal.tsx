@@ -10,9 +10,10 @@ interface AddHospedagemModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: () => void;
+    initialHospedeId?: number | null;
 }
 
-export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospedagemModalProps) {
+export default function AddHospedagemModal({ isOpen, onClose, onSave, initialHospedeId }: AddHospedagemModalProps) {
     const { token } = useAuth();
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
     const [quartos, setQuartos] = useState<Quarto[]>([]);
@@ -39,9 +40,18 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospe
             Promise.all([getHospedes(token), getQuartos(token)]).then(([hospedesRes, quartosRes]) => {
                 setHospedes(hospedesRes);
                 setQuartos(quartosRes);
+
+                if (initialHospedeId) {
+                    const hospedeInicial = hospedesRes.find(h => h.id === initialHospedeId);
+                    if (hospedeInicial) {
+                        setHospedeId(hospedeInicial.id!);
+                        setSearchHospede(`${hospedeInicial.nome} - ${formatCPF(hospedeInicial.cpf)}`);
+                    }
+                }
             });
         }
-    }, [isOpen, token]);
+    }, [isOpen, token, initialHospedeId]);
+
 
     if (!isOpen) return null;
 
@@ -189,7 +199,6 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospe
                             <option value="Cartão de Crédito">Cartão de Crédito</option>
                             <option value="Cartão de Débito">Cartão de Débito</option>
                             <option value="Pix">Pix</option>
-                            <option value="Transferência">Transferência</option>
                         </select>
                     </div>
 
