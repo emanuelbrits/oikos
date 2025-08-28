@@ -45,6 +45,13 @@ export default function HospedagensPage() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editedValues, setEditedValues] = useState<any>({});
     const [novoConsumo, setNovoConsumo] = useState<any>({});
+    const [searchHospede, setSearchHospede] = useState("");
+    const [showSugestoes, setShowSugestoes] = useState(false);
+
+    const norm = (s: string) =>
+        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    const matches = hospedes.filter(h => norm(h.nome).includes(norm(searchHospede)));
 
     const adicionarProduto = async (idHospedagem: number) => {
         if (!token) return;
@@ -248,44 +255,64 @@ export default function HospedagensPage() {
                         }}
                     />
 
-                    <div className="mb-4">
-                        <label className="block mb-1 text-sm font-medium">Hóspede</label>
-                        <select
-                            value={hospedeId}
-                            onChange={(e) => {
-                                setHospedeId(e.target.value);
-                                setQuartoId("");
-                                setCurrentPage(1);
-                            }}
-                            className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
-                        >
-                            <option value="">Todos</option>
-                            {hospedes.map((h) => (
-                                <option key={h.id} value={h.id}>
-                                    {h.nome} - {formatCPF(h.cpf)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <div className="flex gap-4">
+                        <div className="relative w-1/2">
+                            <label className="block mb-1 text-sm font-medium">Hóspede</label>
+                            <input
+                                type="text"
+                                value={searchHospede}
+                                onChange={(e) => {
+                                    setSearchHospede(e.target.value);
+                                    setHospedeId('');
+                                    setShowSugestoes(true);
+                                }}
+                                onFocus={() => setShowSugestoes(true)}
+                                onBlur={() => setTimeout(() => setShowSugestoes(false), 120)}
+                                placeholder="Digite o nome do hóspede"
+                                autoComplete="off"
+                                className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
+                            />
 
-                    <div className="mb-4">
-                        <label className="block mb-1 text-sm font-medium">Quarto</label>
-                        <select
-                            value={quartoId}
-                            onChange={(e) => {
-                                setQuartoId(e.target.value);
-                                setHospedeId("");
-                                setCurrentPage(1);
-                            }}
-                            className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
-                        >
-                            <option value="">Todos</option>
-                            {quartos.map((q) => (
-                                <option key={q.id} value={q.id}>
-                                    {q.numero}
-                                </option>
-                            ))}
-                        </select>
+                            {showSugestoes && searchHospede.trim() !== "" && matches.length > 0 && (
+                                <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-[var(--navy)]/20 rounded-md shadow">
+                                    {matches.slice(0, 12).map((h) => (
+                                        <li
+                                            key={h.id}
+                                            onMouseDown={() => {
+                                                setHospedeId(h.id?.toString()!);
+                                                setQuartoId("");
+                                                setCurrentPage(1);
+                                                setSearchHospede(`${h.nome} - ${formatCPF(h.cpf)}`);
+                                                setShowSugestoes(false);
+                                            }}
+                                            className="px-3 py-2 cursor-pointer hover:bg-[var(--sunshine)]/30"
+                                        >
+                                            {h.nome} - {formatCPF(h.cpf)}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block mb-1 text-sm font-medium">Quarto</label>
+                            <select
+                                value={quartoId}
+                                onChange={(e) => {
+                                    setQuartoId(e.target.value);
+                                    setHospedeId("");
+                                    setCurrentPage(1);
+                                }}
+                                className="w-full p-2 bg-white border border-[var(--navy)]/20 mb-4"
+                            >
+                                <option value="">Todos</option>
+                                {quartos.map((q) => (
+                                    <option key={q.id} value={q.id}>
+                                        {q.numero}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
                     {currentHospedagens.length === 0 ? (
@@ -332,7 +359,7 @@ export default function HospedagensPage() {
 
                                             {expandedRow === hospedagem.id && (
                                                 <tr>
-                                                    <td colSpan={5} className="p-4 bg-gray-50">
+                                                    <td colSpan={6} className="p-4 bg-gray-50">
 
                                                         <div className="flex justify-between">
                                                             <h3 className="font-semibold mb-2 text-lg">Detalhes da Hospedagem</h3>
@@ -387,10 +414,16 @@ export default function HospedagensPage() {
                                                         </div>
 
                                                         <div className="flex flex-col gap-4">
-                                                            <div className="flex bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
+                                                            <div className="flex flex-row bg-[var(--sunshine)]/20 p-2 items-center gap-4 rounded-2xl border-1 border-[var(--navy)]/20">
                                                                 <FaInfo className="text-5xl p-2 bg-[var(--sunshine)]/50 rounded-2xl border-1 border-[var(--navy)]/20" />
-                                                                <div className="flex flex-col">
-                                                                    <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">Hospedagem {hospedagem.id}</h2>
+                                                                <div className="flex flex-col items-start">
+                                                                    <h2 className="text-xl text-[var(--navy)] font-semibold mb-2 truncate">
+                                                                        Hospedagem {hospedagem.id}
+                                                                    </h2>
+                                                                    <h2 className="text-xl font-semibold mb-2 whitespace-normal break-words">
+                                                                        <span className="text-[var(--navy)]">Observações/Acompanhantes:</span>{" "}
+                                                                        {hospedagem.observacoes || "Nenhuma observação"}
+                                                                    </h2>
                                                                 </div>
                                                             </div>
 

@@ -44,7 +44,7 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
             return;
         }
 
-        const camposObrigatorios = { nome, cpf, email, telefone, profissao, rua, bairro, cidade, estado };
+        const camposObrigatorios = { nome, cpf, rua, bairro, cidade, estado };
         const camposVazios = Object.entries(camposObrigatorios).filter(([_, valor]) => !valor.trim());
         if (camposVazios.length > 0) {
             setErrorMsg("Por favor, preencha todos os campos.");
@@ -53,18 +53,18 @@ export default function AddHospedeModal({ isOpen, onClose, onSave }: AddHospedeM
 
         try {
             const response = await createHospede(token, {
-                nome,
+                nome: nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase(),
                 cpf: cpf.replace(/\D/g, ""),
                 email,
                 telefone: telefone.replace(/\D/g, ""),
-                profissao,
+                profissao: profissao.toUpperCase(),
                 cep,
-                rua,
-                bairro,
-                cidade,
+                rua: rua.toUpperCase(),
+                bairro: bairro.toUpperCase(),
+                cidade: cidade.toUpperCase(),
                 numero,
-                estado,
-                complemento,
+                estado: estado.toUpperCase(),
+                complemento: complemento.toUpperCase(),
             });
 
             if (!response.success) {

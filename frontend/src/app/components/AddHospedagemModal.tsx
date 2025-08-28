@@ -17,13 +17,20 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospe
     const [hospedes, setHospedes] = useState<Hospede[]>([]);
     const [quartos, setQuartos] = useState<Quarto[]>([]);
 
-    const [hospedeId, setHospedeId] = useState("");
+    const [hospedeId, setHospedeId] = useState<Number | null>(null);
     const [quartoId, setQuartoId] = useState("");
     const [dataHoraEntrada, setDataHoraEntrada] = useState("");
     const [dataHoraSaidaPrevista, setDataHoraSaidaPrevista] = useState("");
     const [valorDiaria, setValorDiaria] = useState("");
     const [formaPagamento, setFormaPagamento] = useState("");
     const [observacoes, setObservacoes] = useState("");
+    const [searchHospede, setSearchHospede] = useState("");
+    const [showSugestoes, setShowSugestoes] = useState(false);
+
+    const norm = (s: string) =>
+        s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    const matches = hospedes.filter(h => norm(h.nome).includes(norm(searchHospede)));
 
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -89,18 +96,40 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospe
                 <h2 className="text-lg font-bold text-gray-800 mb-4">Adicionar Hospedagem</h2>
 
                 <div className="grid grid-cols-1 gap-4 mb-4">
-                    <div>
+                    <div className="relative">
                         <label className="block mb-1 text-sm font-medium">Hóspede</label>
-                        <select
-                            value={hospedeId}
-                            onChange={(e) => setHospedeId(e.target.value)}
-                            className="w-full p-2 bg-[var(--sunshine)]/50  border border-[var(--navy)]/20"
-                        >
-                            <option value="">Selecione um hóspede</option>
-                            {hospedes.map((h) => (
-                                <option key={h.id} value={h.id}>{h.nome} - {formatCPF(h.cpf)}</option>
-                            ))}
-                        </select>
+                        <input
+                            type="text"
+                            value={searchHospede}
+                            onChange={(e) => {
+                                setSearchHospede(e.target.value);
+                                setHospedeId(null);
+                                setShowSugestoes(true);
+                            }}
+                            onFocus={() => setShowSugestoes(true)}
+                            onBlur={() => setTimeout(() => setShowSugestoes(false), 120)}
+                            placeholder="Digite o nome do hóspede"
+                            autoComplete="off"
+                            className="w-full p-2 bg-[var(--sunshine)]/50 border border-[var(--navy)]/20"
+                        />
+
+                        {showSugestoes && searchHospede.trim() !== "" && matches.length > 0 && (
+                            <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-[var(--navy)]/20 rounded-md shadow">
+                                {matches.slice(0, 12).map((h) => (
+                                    <li
+                                        key={h.id}
+                                        onMouseDown={() => {
+                                            setHospedeId(h.id!);
+                                            setSearchHospede(`${h.nome} - ${formatCPF(h.cpf)}`);
+                                            setShowSugestoes(false);
+                                        }}
+                                        className="px-3 py-2 cursor-pointer hover:bg-[var(--sunshine)]/30"
+                                    >
+                                        {h.nome} - {formatCPF(h.cpf)}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
 
                     <div>
@@ -157,7 +186,6 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospe
                             className="w-full p-2 bg-[var(--sunshine)]/50 border border-[var(--navy)]/20"
                         >
                             <option value="">Selecione</option>
-                            <option value="Dinheiro">Dinheiro</option>
                             <option value="Cartão de Crédito">Cartão de Crédito</option>
                             <option value="Cartão de Débito">Cartão de Débito</option>
                             <option value="Pix">Pix</option>
@@ -166,7 +194,7 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave }: AddHospe
                     </div>
 
                     <div>
-                        <label className="block mb-1 text-sm font-medium">Observações</label>
+                        <label className="block mb-1 text-sm font-medium">Observações/Acompanhantes</label>
                         <textarea
                             value={observacoes}
                             onChange={(e) => setObservacoes(e.target.value)}

@@ -240,7 +240,7 @@ export default function EditHospedagemModal({
                             className="w-full p-2 bg-[var(--sunshine)]/50 border border-[var(--navy)]/20"
                         >
                             <option value="">Selecione</option>
-                            {["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Pix"].map((q) => (
+                            {["Cartão de Crédito", "Cartão de Débito", "Pix"].map((q) => (
                                 <option key={q} value={q}>
                                     {q}
                                 </option>
@@ -271,7 +271,7 @@ export default function EditHospedagemModal({
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-1 text-sm font-medium">Observações</label>
+                    <label className="block mb-1 text-sm font-medium">Observações/Acompanhantes</label>
                     <textarea
                         value={observacoes}
                         onChange={(e) => setObservacoes(e.target.value)}

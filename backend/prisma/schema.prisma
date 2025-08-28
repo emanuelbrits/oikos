@@ -16,7 +16,7 @@ model Hospede {
   id          Int          @id @default(autoincrement())
   nome        String
   cpf         String       @unique
-  email       String?      @unique
+  email       String?      
   telefone    String?
   profissao   String?
   cep         String?

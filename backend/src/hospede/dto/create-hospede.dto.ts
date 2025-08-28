@@ -18,13 +18,11 @@ export class CreateHospedeDto {
   cpf: string;
 
   @ApiProperty({ example: 'joao@email.com', required: false })
-  @IsEmail()
   @IsOptional()
   email?: string;
 
   @ApiProperty({ example: '11999999999', required: false })
   @IsOptional()
-  @Matches(/^\d{11}$/, { message: 'Telefone deve conter exatamente 11 dígitos numéricos' })
   telefone?: string;
 
   @ApiProperty({ example: 'Programador', required: false })

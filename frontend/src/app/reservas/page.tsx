@@ -24,7 +24,7 @@ export default function ReservasPage() {
 
     const [quartoSelecionado, setQuartoSelecionado] = useState<number | null>(null);
     const [hospedeId, setHospedeId] = useState<number | null>(null);
-    const [formaPagamento, setFormaPagamento] = useState<string>("Dinheiro");
+    const [formaPagamento, setFormaPagamento] = useState<string>("Cartão de Crédito");
     const [entrada, setEntrada] = useState<string>("");
     const [saida, setSaida] = useState<string>("");
     const [observacao, setObservacao] = useState<string>("");
@@ -164,7 +164,7 @@ export default function ReservasPage() {
                                             className="w-full p-3 border rounded-lg"
                                             disabled={!quartoSelecionado}
                                         >
-                                            {["Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Pix"].map((fp) => (
+                                            {["Cartão de Crédito", "Cartão de Débito", "Pix"].map((fp) => (
                                                 <option key={fp} value={fp}>
                                                     {fp}
                                                 </option>
