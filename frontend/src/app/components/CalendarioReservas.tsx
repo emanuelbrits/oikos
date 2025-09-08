@@ -24,8 +24,11 @@ export default function CalendarioReservas({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservaSelecionada, setReservaSelecionada] = useState<Reserva | null>(null);
 
+  const [reservasDoDiaSelecionadas, setReservasDoDiaSelecionadas] = useState<Reserva[]>([]);
+  const [isDiaModalOpen, setIsDiaModalOpen] = useState(false);
+
   const [reservasState, setReservasState] = useState<Reserva[]>(reservas);
-  const [laneMap, setLaneMap] = useState<Record<number, number>>({}); 
+  const [laneMap, setLaneMap] = useState<Record<number, number>>({});
   const [maxLanes, setMaxLanes] = useState(0);
 
   useEffect(() => {
@@ -143,7 +146,15 @@ export default function CalendarioReservas({
 
           return (
             <div key={day} className="border border-gray-200 text-xs flex flex-col min-h-[60px] h-auto">
-              <div className="font-bold text-gray-700 text-center">{day}</div>
+              <div
+                className="font-bold text-gray-700 text-center cursor-pointer hover:bg-gray-200 rounded"
+                onClick={() => {
+                  setReservasDoDiaSelecionadas(reservasDoDia);
+                  setIsDiaModalOpen(true);
+                }}
+              >
+                {day}
+              </div>
               <div className="flex flex-col gap-0.5 overflow-hidden">
                 {reservasDoDia.map((res) => {
                   const lane = res.id != null ? (laneMap[res.id] ?? 0) : 0;
@@ -178,24 +189,24 @@ export default function CalendarioReservas({
           isOpen={isModalOpen}
           reserva={reservaSelecionada}
           onClose={async (isEdited, deleted, reserva) => {
-            
+
             setIsModalOpen(false);
             setReservaSelecionada(null);
 
-            if(isEdited) {
+            if (isEdited) {
               const index = reservasState.findIndex((r) => r.id === reserva?.id);
-              
+
               if (index !== -1) {
                 const updated = [...reservasState];
-                
+
                 updated[index] = { ...updated[index], ...reserva };
                 setReservasState(updated);
               }
             }
-            
+
             if (deleted) {
               const novas = reservasState.filter((r) => r.id !== reserva?.id);
-              
+
               setReservasState(novas);
 
               if (onReservasChange) {
@@ -204,6 +215,42 @@ export default function CalendarioReservas({
             }
           }}
         />
+      )}
+
+      {isDiaModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+          <div className="bg-white p-4 rounded-xl shadow-lg max-w-lg w-full">
+            <h2 className="text-xl font-bold mb-4">Reservas do dia</h2>
+            {reservasDoDiaSelecionadas.length > 0 ? (
+              <ul className="space-y-2">
+                {reservasDoDiaSelecionadas.map((r) => (
+                  <li
+                    key={r.id}
+                    className="p-2 border rounded cursor-pointer hover:bg-gray-100"
+                    onClick={() => {
+                      setReservaSelecionada(r);
+                      setIsDiaModalOpen(false);
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    {r.hospede?.nome ?? "Reserva"} - Quarto {r.quarto?.numero ?? "?"}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Nenhuma reserva para este dia.</p>
+            )}
+
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setIsDiaModalOpen(false)}
+                className="px-4 py-2 bg-[var(--navy)] text-[var(--sunshine)] rounded cursor-pointer"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

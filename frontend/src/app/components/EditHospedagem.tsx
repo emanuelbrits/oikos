@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Hospedagem, updateHospedagem } from "../services/hospedagensService";
-import { getQuartos, Quarto } from "../services/quartosService";
+import { getQuartos, Quarto, updateQuarto } from "../services/quartosService";
 import { getHospedes, Hospede } from "../services/hospedesService";
 import { data } from "framer-motion/client";
 
@@ -106,6 +106,14 @@ export default function EditHospedagemModal({
             if (!response.success) {
                 setErrorMsg(response.message);
                 return;
+            }
+
+            if (dataHoraSaidaAux) {
+                try {
+                    await updateQuarto(token, quartoId, { status: "Disponível" });
+                } catch (err) {
+                    console.error("Erro ao atualizar quarto:", err);
+                }
             }
 
             onSave({

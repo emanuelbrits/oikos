@@ -23,6 +23,8 @@ export default function QuadroReservas({
   const [reservaSelecionada, setReservaSelecionada] = useState<Reserva | null>(null);
   const [reservasState, setReservasState] = useState<Reserva[]>(reservas);
 
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
   const statusOrder: Record<string, number> = {
     "Reservado": 1,
     "Na fila": 2,
@@ -53,7 +55,19 @@ export default function QuadroReservas({
   const reservasFiltradas = reservasState.filter((res) => {
     const statusOk = statusFilter[res.status ?? ""];
     const hospedeOk = hospedeId ? res.hospede?.id === Number(hospedeId) : true;
-    return statusOk && hospedeOk;
+
+    let dateOk = true;
+    if (selectedDate) {
+      const date = dayjs(selectedDate);
+      dateOk = date.isBetween(
+        dayjs(res.dataHoraInicial),
+        dayjs(res.dataHoraFinal),
+        "day",
+        "[]"
+      );
+    }
+
+    return statusOk && hospedeOk && dateOk;
   });
 
   const ordenarReservas = (a: Reserva, b: Reserva) => {
@@ -124,6 +138,21 @@ export default function QuadroReservas({
           <option value="entradaRecentes">Ordenar por entradas mais recentes</option>
           <option value="status">Ordenar por status</option>
         </select>
+
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="border rounded px-2 py-1"
+        />
+        
+        <button
+          type="button"
+          onClick={() => setSelectedDate("")}
+          className="border rounded px-2 py-1 cursor-pointer"
+        >
+          Limpar Data
+        </button>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto pr-2">

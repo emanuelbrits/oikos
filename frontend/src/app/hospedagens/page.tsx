@@ -766,7 +766,7 @@ export default function HospedagensPage() {
                                                                                     <input
                                                                                         type="number"
                                                                                         placeholder="Valor Unitário"
-                                                                                        value={novoConsumo.valorUnitario || 0}
+                                                                                        value={novoConsumo.valorUnitario}
                                                                                         onChange={(e) => setNovoConsumo({ ...novoConsumo, valorUnitario: Number(e.target.value) })}
                                                                                         className="border rounded px-2 py-1 text-center" />
                                                                                 </td>
@@ -774,7 +774,7 @@ export default function HospedagensPage() {
                                                                                     <input
                                                                                         type="number"
                                                                                         placeholder="Quantidade"
-                                                                                        value={novoConsumo.quantidade || 0}
+                                                                                        value={novoConsumo.quantidade}
                                                                                         onChange={(e) => setNovoConsumo({ ...novoConsumo, quantidade: Number(e.target.value) })}
                                                                                         className="border rounded px-2 py-1 text-center" />
                                                                                 </td>
@@ -784,7 +784,7 @@ export default function HospedagensPage() {
                                                                                         onChange={(e) => setNovoConsumo({ ...novoConsumo, formaPagamento: e.target.value })}
                                                                                         className="border rounded px-2 py-1"
                                                                                     >
-                                                                                        <option value="">Selecione</option>
+                                                                                        <option value="">Forma de pagamento</option>
                                                                                         <option value="Dinheiro">Dinheiro</option>
                                                                                         <option value="Cartão de Crédito">Cartão de Crédito</option>
                                                                                         <option value="Cartão de Débito">Cartão de Débito</option>
