@@ -39,7 +39,7 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave, initialHos
         if (isOpen && token) {
             Promise.all([getHospedes(token), getQuartos(token)]).then(([hospedesRes, quartosRes]) => {
                 setHospedes(hospedesRes);
-                setQuartos(quartosRes);
+                setQuartos(quartosRes.filter(q => q.status === "Disponível"));
 
                 if (initialHospedeId) {
                     const hospedeInicial = hospedesRes.find(h => h.id === initialHospedeId);
@@ -169,9 +169,12 @@ export default function AddHospedagemModal({ isOpen, onClose, onSave, initialHos
                     <div>
                         <label className="block mb-1 text-sm font-medium">Data/Hora de Saída Prevista</label>
                         <input
-                            type="datetime-local"
-                            value={dataHoraSaidaPrevista}
-                            onChange={(e) => setDataHoraSaidaPrevista(e.target.value)}
+                            type="date"
+                            value={dataHoraSaidaPrevista.split("T")[0]}
+                            onChange={(e) => {
+                                const dataSelecionada = e.target.value;
+                                setDataHoraSaidaPrevista(`${dataSelecionada}T12:00`);
+                            }}
                             className="w-full p-2 bg-[var(--sunshine)]/50 rounded-2xl border border-[var(--navy)]/20"
                         />
                     </div>

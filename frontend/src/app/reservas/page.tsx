@@ -82,7 +82,6 @@ export default function ReservasPage() {
                 <Sidebar />
                 <main className="flex-1 p-4 md:p-6 flex gap-4">
                     <div className="flex-[0.4] flex flex-col gap-6">
-                        {/* QUARTOS */}
                         <div className="bg-white p-6 rounded-xl shadow">
                             <h2 className="font-semibold mb-4 text-lg">Quartos</h2>
                             <ul className="grid grid-cols-5 gap-2">
@@ -100,7 +99,6 @@ export default function ReservasPage() {
                             </ul>
                         </div>
 
-                        {/* NOVA RESERVA */}
                         <div className="bg-white p-6 rounded-xl shadow flex-1">
                             <h2 className="font-semibold mb-4 text-lg">Nova Reserva</h2>
                             <form
@@ -218,9 +216,12 @@ export default function ReservasPage() {
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Saída</label>
                                         <input
-                                            type="datetime-local"
-                                            value={saida}
-                                            onChange={(e) => setSaida(e.target.value)}
+                                            type="date"
+                                            value={saida.split("T")[0]}
+                                            onChange={(e) => {
+                                                const dataSelecionada = e.target.value;
+                                                setSaida(`${dataSelecionada}T12:00`);
+                                            }}
                                             className="w-full p-3 border rounded-lg"
                                             disabled={!quartoSelecionado}
                                         />
